@@ -140,7 +140,7 @@ class GoldHand:
                 else:
                     fall = round((1-(current_low / prev_high))*100, 2)
                     if fall < 30:
-                        temj = '🪂'
+                        temj = '💸'
                     elif fall < 50:
                         temj = '💸'
                     else:
