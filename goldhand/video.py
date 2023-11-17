@@ -1,6 +1,7 @@
 import tempfile
 import os
 from tqdm import tqdm
+from stocks import *
 
 def create_video(tickers, output_file, second_to_watch_a_plot = 5):
     t_folder = tempfile.TemporaryDirectory()
