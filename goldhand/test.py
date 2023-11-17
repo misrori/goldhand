@@ -11,6 +11,7 @@ tw =Tw()
 
 tickers_df= tw.get_top_n_stocks_by_sector()
 
+print(tickers_df.head())
 
-create_video(tickers_df['name'][1:10], '/home/mihaly/Videos/try.mp4')
+create_video(list(tickers_df['name'][1:20]), '/home/mihaly/Videos/try.mp4')
 

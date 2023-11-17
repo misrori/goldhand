@@ -63,8 +63,8 @@ class Tw:
     def get_top_n_stocks_by_sector(self,percent=10):
         return( 
                (
-                tw.stock.groupby('sector')
-                 .apply(lambda x: x.nlargest(int(len(x) * round((percent/100)) ), 'market_cap_basic'))
+                self.stock.groupby('sector')
+                 .apply(lambda x: x.nlargest(int(len(x) * round((percent/100),2) ), 'market_cap_basic'))
                  .reset_index(drop=True)
                 )
             )
