@@ -58,6 +58,17 @@ class Tw:
                 'ind_loc': f"{tind.index[tind['name']==ticker].to_list()[0] +1 }/{tind.shape[0]}",
                 'performance': f"Performance|week:{round(one_row['Perf.W'], 2)}% | month:{round(one_row['Perf.1M'], 2)}% | 6 months:{round(one_row['Perf.6M'], 2)}% | year:{round(one_row['Perf.Y'], 2)}% |"
                 })
+        
+        
+    def get_top_n_stocks_by_sector(self,percent=10):
+        return( 
+               (
+                tw.stock.groupby('sector')
+                 .apply(lambda x: x.nlargest(int(len(x) * round((percent/100)) ), 'market_cap_basic'))
+                 .reset_index(drop=True)
+                )
+            )
+
 
     def get_plotly_title(self, ticker):
 

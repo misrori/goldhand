@@ -14,7 +14,8 @@ setup(
     description="A package working with financial data",
     url="https://github.com/misrori/goldhand",
     license="MIT",
-    install_requires=['pandas_datareader', 'pandas', 'pandas_ta', 'plotly', 'scipy', 'numpy', 'requests', 'cloudscraper'],
+    install_requires=['pandas_datareader', 'pandas', 'pandas_ta', 'plotly', 'scipy', 
+                      'numpy', 'requests', 'cloudscraper', 'temp_file', 'os', 'tqdm'],
     packages=find_packages(),
     # other arguments omitted
     long_description=long_description,
