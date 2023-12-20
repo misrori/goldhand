@@ -16,7 +16,7 @@ class Tw:
         self.get_all_crypto()
 
     def get_all_stock(self):
-        data_query = '{"filter":[{"left":"type","operation":"in_range","right":["stock","dr","fund"]},{"left":"subtype","operation":"in_range","right":["common","foreign-issuer","","etf","etf,odd","etf,otc","etf,cfd"]},{"left":"exchange","operation":"in_range","right":["AMEX","NASDAQ","NYSE"]},{"left":"is_primary","operation":"equal","right":true},{"left":"active_symbol","operation":"equal","right":true}],"options":{"lang":"en"},"markets":["america"],"symbols":{"query":{"types":[]},"tickers":[]},"columns":["logoid","name","close","change","change_abs","Recommend.All","volume","Value.Traded","market_cap_basic","price_earnings_ttm","earnings_per_share_basic_ttm","number_of_employees","sector","industry","RSI","SMA50","SMA100","SMA200","BB.lower","BB.upper","Perf.W","Perf.Y","Perf.YTD","Perf.3M","Perf.6M","Perf.1M","High.1M","High.3M","High.6M","price_52_week_high","High.All","description","type","subtype","update_mode","pricescale","minmov","fractional","minmove2","RSI[1]","currency","fundamental_currency_code"],"sort":{"sortBy":"market_cap_basic","sortOrder":"desc"},"range":[0,9000]}'
+        data_query = '{"filter":[{"left":"type","operation":"in_range","right":["stock","dr","fund"]},{"left":"subtype","operation":"in_range","right":["common","foreign-issuer","","etf","etf,odd","etf,otc","etf,cfd"]},{"left":"exchange","operation":"in_range","right":["AMEX","NASDAQ","NYSE"]},{"left":"is_primary","operation":"equal","right":true},{"left":"active_symbol","operation":"equal","right":true}],"options":{"lang":"en"},"markets":["america"],"symbols":{"query":{"types":[]},"tickers":[]},"columns":["logoid","name","close","change","change_abs","Recommend.All","volume","Value.Traded","market_cap_basic","price_earnings_ttm","earnings_per_share_basic_ttm","number_of_employees","sector","High.3M","Low.3M","Perf.3M","Perf.5Y","High.1M","Low.1M","High.6M","Low.6M","Perf.6M","beta_1_year","price_52_week_high","price_52_week_low","High.All","Low.All","BB.lower","BB.upper","change|1M","change_abs|1M","change|1W","change_abs|1W","change|240","country","EMA50","EMA100","EMA200","MACD.macd","MACD.signal","Mom","Perf.1M","RSI7","SMA50","SMA100","SMA200","Stoch.RSI.K","Stoch.RSI.D","Perf.W","Perf.Y","Perf.YTD","industry","Perf.All","description","type","subtype","update_mode","pricescale","minmov","fractional","minmove2","Mom[1]","RSI7[1]","Rec.Stoch.RSI","currency","fundamental_currency_code"],"sort":{"sortBy":"market_cap_basic","sortOrder":"desc"},"range":[0,8000]}'
         response = requests.post('https://scanner.tradingview.com/america/scan', data=data_query)
         data = response.json()
         list_elements = list(map(lambda x:x['d'], data['data'] ))
@@ -94,16 +94,7 @@ class Tw:
 
         fig = px.bar(secdf, x='name', y='market_cap_basic', title = f"{row_df['Company'].iloc[0]} ({row_df['name'].iloc[0]})<br>{row_df['sector'].iloc[0]} | {row_df['industry'].iloc[0]}", labels={'market_cap_basic':'Market kapitalization'}, text='Company')
 
-        fig.add_annotation( x=row_df['name'].iloc[0], y=row_df['market_cap_basic'].iloc[0], text= f"{market_cap}",  showarrow=True,
-                        align="center", bordercolor="#c7c7c7",
-                        font=dict(family="Courier New, monospace", size=16, color="#214e34" ), borderwidth=2,
-                        borderpad=4,
-                        bgcolor="#f4fdff",
-                        opacity=0.8,
-                        arrowhead=2,
-                        arrowsize=1,
-                        arrowwidth=1,
-                        ax=65,ay=-45)
+        fig.add_annotation( x=row_df['name'].iloc[0], y=row_df['market_cap_basic'].iloc[0], text= f"{market_cap}",  showarrow=True, align="center", bordercolor="#c7c7c7", font=dict(family="Courier New, monospace", size=16, color="#214e34" ), borderwidth=2, borderpad=4, bgcolor="#f4fdff", opacity=0.8, arrowhead=2, arrowsize=1, arrowwidth=1, ax=65,ay=-45)
         fig.update_layout(showlegend=False, plot_bgcolor='white', height=600)
         fig.show()
 
@@ -122,19 +113,12 @@ class Tw:
         fig = px.bar(inddf, x='name', y='market_cap_basic', title = f"{row_df['Company'].iloc[0]} ({row_df['name'].iloc[0]})<br>{row_df['sector'].iloc[0]} | {row_df['industry'].iloc[0]}", labels={'market_cap_basic':'Market kapitalization'}, text='Company')
 
 
-        fig.add_annotation( x=row_df['name'].iloc[0], y=row_df['market_cap_basic'].iloc[0], text= f"{market_cap}",  showarrow=True,
-                        align="center", bordercolor="#c7c7c7",
-                        font=dict(family="Courier New, monospace", size=16, color="#214e34" ), borderwidth=2,
-                        borderpad=4,
-                        bgcolor="#f4fdff",
-                        opacity=0.8,
-                        arrowhead=2,
-                        arrowsize=1,
-                        arrowwidth=1,
-                        ax=65,ay=-45)
+        fig.add_annotation( x=row_df['name'].iloc[0], y=row_df['market_cap_basic'].iloc[0], text= f"{market_cap}",  showarrow=True, align="center", bordercolor="#c7c7c7", font=dict(family="Courier New, monospace", size=16, color="#214e34" ), borderwidth=2, borderpad=4, bgcolor="#f4fdff", opacity=0.8, arrowhead=2, arrowsize=1, arrowwidth=1, ax=65,ay=-45)
         fig.update_layout(showlegend=False, plot_bgcolor='white', height=600)
         fig.show()
         
 
 
-tw = Tw()
+#tw = Tw()
+#print(tw.stock.head(1).T)
+#print(tw.crypto.head(1).T)
