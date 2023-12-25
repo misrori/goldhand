@@ -30,6 +30,17 @@ class GoldHand:
         if self.ad_ticker:
             df['ticker'] = self.ticker
         return(df)
+    
+    def smma(self, data, window, colname):
+        hl2 = data['hl2'].values
+        smma_values = [hl2[0]]
+
+        for i in range(1, len(hl2)):
+            smma_val = (smma_values[-1] * (window - 1) + hl2[i]) / window
+            smma_values.append(smma_val)
+
+        data[colname] = smma_values
+        return data
 
 
 
@@ -37,7 +48,8 @@ class GoldHand:
         # Download historical stock data for the last year
         self.df = self.get_olhc()
         self.df.columns = self.df.columns.str.lower()
-
+        self.df['hl2'] = (self.df['high'] + self.df['low'])/2
+        
         # Rsi
         self.df['rsi'] = ta.rsi(self.df['close'], 14)
 
@@ -148,7 +160,7 @@ class GoldHand:
             if direction == 'minimum':
                 fig.add_annotation( x=tdate, y=min_price, text=local_text, showarrow=True, align="center", bordercolor="#c7c7c7", font=dict(family="Courier New, monospace", size=16, color="red" ), borderwidth=2, borderpad=4, bgcolor="#f4fdff", opacity=0.8, arrowhead=2, arrowsize=1, arrowwidth=1, ax=45,ay=45)
 
-            fig.update_layout(showlegend=False, plot_bgcolor='white', height=plot_height, title= plot_title)
+        fig.update_layout(showlegend=False, plot_bgcolor='white', height=plot_height, title= plot_title)
 
         fig.update_xaxes( mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey' )
         fig.update_yaxes( mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey')
@@ -157,7 +169,62 @@ class GoldHand:
         fig.add_trace( go.Scatter(x=tdf['date'], y=tdf['sma_200'], opacity =0.7, line=dict(color='red', width = 2.5) ,  name = 'SMA 200') )
         return(fig)
 
+    def plot_goldhand_line(self, plot_title, plot_height=900):
+        
+        data = self.df.copy()
+        # Apply SMMA to the dataframe
+        data = self.smma(data, 15, 'v1')
+        data = self.smma(data, 19, 'v2')
+        data = self.smma(data, 25, 'v3')
+        data = self.smma(data, 29, 'v4')
 
+        data['color'] = 'grey'  # Set default color to grey
+
+        # Update color based on conditions
+        data.loc[(data['v4'] < data['v3']) & (data['v3'] < data['v2']) & (data['v2'] < data['v1']), 'color'] = 'gold'
+        data.loc[(data['v1'] < data['v2']) & (data['v2'] < data['v3']) & (data['v3'] < data['v4']), 'color'] = 'blue'
+
+        # Identify rows where color changes compared to the previous row
+        data['color_change'] = data['color'] != data['color'].shift(1)
+
+        # Create a 'group' column and increase the value only when there's a color change
+        data['group'] = (data['color_change']).cumsum()
+
+        tdf = data.tail(800)
+
+        fig = go.Figure(data=go.Ohlc(x=tdf['date'], open=tdf['open'], high=tdf['high'], low=tdf['low'],close=tdf['close']))
+
+        fig.update_xaxes( mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey' )
+        fig.update_yaxes( mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey')
+        fig.update(layout_xaxis_rangeslider_visible=False)
+
+        for group_id in tdf['group'].unique():
+            if group_id ==tdf['group'].unique().max():
+                indices = tdf[tdf['group'] == group_id].index.to_list()
+            else:
+                indices = tdf[tdf['group'] == group_id].index.to_list()
+                indices.append(indices[-1]+1)
+
+
+            group_df = tdf.loc[indices]
+
+            group_color = group_df['color'].iloc[0]
+            color_dict = {'gold' : 'rgba(255, 215, 0, 0.4)' , 'grey' : 'rgba(128, 128 ,128, 0.4)' , 'blue' : 'rgba(0, 0, 255, 0.4)' }
+
+            # Create v1 and v4 traces
+            trace_v1 = go.Scatter(x=group_df['date'], y=group_df['v1'], mode='lines', name='v1', line=dict(color=color_dict[group_color]) )
+            trace_v4 = go.Scatter(x=group_df['date'], y=group_df['v4'], mode='lines', name='v4', line=dict(color=color_dict[group_color]), fill='tonexty', fillcolor =color_dict[group_color])
+
+            # Add candlestick trace and additional lines to the figure
+            fig.add_trace(trace_v1)
+            fig.add_trace(trace_v4)
+
+        fig.update_layout(showlegend=False, plot_bgcolor='white', height=plot_height, title= plot_title)
+        return(fig)
+
+        
+        
+        
 # https://stackoverflow.com/questions/71411995/pandas-plotly-secondary-graph-needs-to-be-to-rsi
 
 #https://wire.insiderfinance.io/plot-candlestick-rsi-bollinger-bands-and-macd-charts-using-yfinance-python-api-1c2cb182d147
