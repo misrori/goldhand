@@ -5,8 +5,9 @@ import plotly.graph_objects as go
 import plotly.express as px
 
 class Backtest:
-    def __init__(self, data, strategy_function, **kwargs):
+    def __init__(self, data, strategy_function, plot_title='', **kwargs):
         self.data = data
+        self.plot_title = plot_title
         self.strategy_function = strategy_function
         self.additional_params = kwargs
         self.add_trades()
@@ -57,7 +58,6 @@ class Backtest:
         fig = go.Figure(data=go.Ohlc(x=tdf['date'], open=tdf['open'], high=tdf['high'], low=tdf['low'],close=tdf['close']))
         fig.add_trace( go.Scatter(x=tdf['date'], y=tdf['sma_50'], opacity =0.5, line=dict(color='lightblue', width = 2) , name = 'SMA 50') )
         fig.add_trace( go.Scatter(x=tdf['date'], y=tdf['sma_200'], opacity =0.7, line=dict(color='red', width = 2.5) ,  name = 'SMA 200') )
-        fig.update_layout(showlegend=False, plot_bgcolor='white', height=800, title= f"Closed trades" )
         fig.update(layout_xaxis_rangeslider_visible=False)
         fig.update_xaxes( mirror=True,  ticks='outside',  showline=True,  linecolor='black', gridcolor='lightgrey')
         fig.update_yaxes( mirror=True,  ticks='outside',  showline=True, linecolor='black',  gridcolor='lightgrey')
@@ -101,7 +101,7 @@ class Backtest:
             fig.add_shape(type="rect", x0=buy_point[0], y0=buy_point[1], x1=sell_point[0], y1=sell_point[1],line=dict(color= triangle_color ,width=2,),fillcolor="LightSkyBlue", opacity=0.3, label=dict( text=f"{result}<br>{row['days_in_trade']} days",   textposition="bottom center", font=dict(size=13, color =triangle_color, family="Times New Roman")))
 
             # set size
-            fig.update_layout(showlegend=False, plot_bgcolor='white', )
+            fig.update_layout(showlegend=False, plot_bgcolor='white',title=self.plot_title  ,height=900)
 
         return(fig)
 

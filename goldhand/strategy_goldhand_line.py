@@ -8,7 +8,32 @@ from goldhand import *
 
 
 
-def rsi_strategy(data, buy_threshold = 30, sell_threshold = 70):
+def goldhand_line_strategy(data):
+
+    data['hl2'] = (data['high'] + data['low'])/2
+
+    def smma(data, window, colname):
+        hl2 = data['hl2'].values
+        smma_values = [hl2[0]]
+
+        for i in range(1, len(hl2)):
+            smma_val = (smma_values[-1] * (window - 1) + hl2[i]) / window
+            smma_values.append(smma_val)
+
+        data[colname] = smma_values
+        return data
+
+    # Apply SMMA to the dataframe
+    data = smma(data, 15, 'v1')
+    data = smma(data, 19, 'v2')
+    data = smma(data, 25, 'v3')
+    data = smma(data, 29, 'v4')
+
+    data['color'] = 'grey'  # Set default color to grey
+
+    # Update color based on conditions
+    data.loc[(data['v4'] < data['v3']) & (data['v3'] < data['v2']) & (data['v2'] < data['v1']), 'color'] = 'gold'
+    data.loc[(data['v1'] < data['v2']) & (data['v2'] < data['v3']) & (data['v3'] < data['v4']), 'color'] = 'blue'
 
     in_trade = False  # Flag to track if already in a trade
     trade_id = 1
@@ -20,7 +45,7 @@ def rsi_strategy(data, buy_threshold = 30, sell_threshold = 70):
         # Check if not already in a trade
         if not in_trade:
             # Generate buy signal
-            if data['rsi'][i] < buy_threshold:
+            if (data['color'][i] =='gold') :
 
                 temp_trade['buy_price'] = data['close'][i]
                 temp_trade['trade_id'] = trade_id
@@ -29,7 +54,7 @@ def rsi_strategy(data, buy_threshold = 30, sell_threshold = 70):
                 in_trade = True  # Set flag to indicate in a trade
         else:
             # Generate sell signal
-            if data['rsi'][i] > sell_threshold:
+            if (data['color'][i] =='grey') :
 
                 temp_trade['sell_price'] = data['close'][i]
                 temp_trade['trade_id'] = trade_id
@@ -67,21 +92,84 @@ def rsi_strategy(data, buy_threshold = 30, sell_threshold = 70):
 
 
 
-def show_indicator_rsi_strategy(ticker, buy_threshold = 30, sell_threshold = 70, plot_title = 'RSI Strategy'):
+def show_indicator_goldhand_line_strategy(ticker, plot_title = 'Goldhand line Strategy'):
 
-    tdf = GoldHand(ticker).df
-    backtest = Backtest( tdf, rsi_strategy, buy_threshold=buy_threshold, sell_threshold=sell_threshold)
+    data = GoldHand(ticker).df
+
+    #### data prepar
+    data['hl2'] = (data['high'] + data['low'])/2
+
+    def smma(data, window, colname):
+        hl2 = data['hl2'].values
+        smma_values = [hl2[0]]
+
+        for i in range(1, len(hl2)):
+            smma_val = (smma_values[-1] * (window - 1) + hl2[i]) / window
+            smma_values.append(smma_val)
+
+        data[colname] = smma_values
+        return data
+
+    # Apply SMMA to the dataframe
+    data = smma(data, 15, 'v1')
+    data = smma(data, 19, 'v2')
+    data = smma(data, 25, 'v3')
+    data = smma(data, 29, 'v4')
+
+    data['color'] = 'grey'  # Set default color to grey
+
+    # Update color based on conditions
+    data.loc[(data['v4'] < data['v3']) & (data['v3'] < data['v2']) & (data['v2'] < data['v1']), 'color'] = 'gold'
+    data.loc[(data['v1'] < data['v2']) & (data['v2'] < data['v3']) & (data['v3'] < data['v4']), 'color'] = 'blue'
+
+
+
+    # Identify rows where color changes compared to the previous row
+    data['color_change'] = data['color'] != data['color'].shift(1)
+
+    # Create a 'group' column and increase the value only when there's a color change
+    data['group'] = (data['color_change']).cumsum()
+
+
+    ##### data prepar end
+
+    ##### backtest
+    backtest = Backtest( data, goldhand_line_strategy, plot_title = 'Goldhand line Strategy' )
     trades =backtest.trades
 
-    # Create subplots with shared x-axis and custom heights
-    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.1, subplot_titles=[plot_title, "RSI"], row_heights=[0.7, 0.3])
 
-    # Add OHLC candlestick chart
-    fig.add_trace(go.Ohlc(x=tdf['date'], open=tdf['open'], high=tdf['high'], low=tdf['low'], close=tdf['close']), row=1, col=1)
+    # base plot
+    fig = go.Figure(data=go.Ohlc(x=data['date'], open=data['open'], high=data['high'], low=data['low'],close=data['close']))
+    fig.update_xaxes( mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey' )
+    fig.update_yaxes( mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey')
+    fig.update(layout_xaxis_rangeslider_visible=False)
 
-    # Add SMA lines
-    fig.add_trace(go.Scatter(x=tdf['date'], y=tdf['sma_50'], opacity=0.5, line=dict(color='lightblue', width=2), name='SMA 50'), row=1, col=1)
-    fig.add_trace(go.Scatter(x=tdf['date'], y=tdf['sma_200'], opacity=0.7, line=dict(color='red', width=2.5), name='SMA 200'), row=1, col=1)
+
+    for group_id in data['group'].unique():
+        if group_id ==data['group'].unique().max():
+
+            indices = data[data['group'] == group_id].index.to_list()
+        else:
+            indices = data[data['group'] == group_id].index.to_list()
+            indices.append(indices[-1]+1)
+
+
+        group_df = data.loc[indices]
+
+        group_color = group_df['color'].iloc[0]
+        color_dict = {'gold' : 'rgba(255, 215, 0, 0.4)' , 'grey' : 'rgba(128, 128 ,128, 0.4)' , 'blue' : 'rgba(0, 0, 255, 0.4)' }
+
+
+
+        # Create v1 and v4 traces
+        trace_v1 = go.Scatter(x=group_df['date'], y=group_df['v1'], mode='lines', name='v1', line=dict(color=color_dict[group_color]) )
+        trace_v4 = go.Scatter(x=group_df['date'], y=group_df['v4'], mode='lines', name='v4', line=dict(color=color_dict[group_color]), fill='tonexty', fillcolor =color_dict[group_color])
+
+
+        # Add candlestick trace and additional lines to the figure
+        fig.add_trace(trace_v1)
+        fig.add_trace(trace_v4)
+
 
     # Add trade points and annotations
     for index, row in trades.iterrows():
@@ -143,25 +231,18 @@ def show_indicator_rsi_strategy(ticker, buy_threshold = 30, sell_threshold = 70,
     fig.update(layout_xaxis_rangeslider_visible=False)
 
     # Update x-axes and y-axes for the main chart
-    fig.update_xaxes(mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey', row=1, col=1)
-    fig.update_yaxes(mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey', row=1, col=1)
+    fig.update_xaxes(mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey')
+    fig.update_yaxes(mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey')
 
     # Update x-axes and y-axes for the RSI subplot
-    fig.update_xaxes(mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey', row=2, col=1)
-    fig.update_yaxes(mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey', row=2, col=1)
+    fig.update_xaxes(mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey')
+    fig.update_yaxes(mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey')
 
 
-
-
-    # Add RSI line
-    fig.add_trace(go.Scatter(x=tdf['date'], y=tdf['rsi'], line=dict(color='green', width=2), name='RSI'), row=2, col=1)
-    fig.add_shape(type="line", x0=tdf['date'].min(), x1=tdf['date'].max(), y0=buy_threshold, y1=buy_threshold, line=dict(color="black", width=2, dash="dash"), row=2, col=1)
-    fig.add_shape(type="line", x0=tdf['date'].min(), x1=tdf['date'].max(), y0=sell_threshold, y1=sell_threshold, line=dict(color="black", width=2, dash="dash"), row=2, col=1)
 
 
     # Show the plot
     fig.show()
 
 
-# Test
-# show_indicator_rsi_strategy('TSLA', 30,80)
+#show_indicator_goldhand_line_strategy('TSLA', plot_title='sdgfsdg')
