@@ -140,7 +140,7 @@ def show_indicator_goldhand_line_strategy(ticker, plot_title = '', ndays=0, plot
       data = data.tail(ndays)
       trades = trades.loc[trades['buy_date']>data.date.min()]
 
-    if data['high'].max() >= max(data['high'][0:50]):
+    if data['high'].max() == max(data['high'][0:50]):
         tex_loc = [0.1, 0.2]
     else:
         tex_loc = [0.1, 0.85]

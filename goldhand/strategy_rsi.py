@@ -77,7 +77,7 @@ def show_indicator_rsi_strategy(ticker, buy_threshold = 30, sell_threshold = 70,
         tdf = data.tail(tdf)
         trades = trades.loc[trades['buy_date']>tdf.date.min()]
         
-    if data['high'].max() >= max(data['high'][0:50]):
+    if tdf['high'].max() == max(tdf['high'][0:50]):
         tex_loc = [0.1, 0.2]
     else:
         tex_loc = [0.1, 0.85]
