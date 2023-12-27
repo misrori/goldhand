@@ -91,8 +91,7 @@ def goldhand_line_strategy(data):
     return(res_df)
 
 
-
-def show_indicator_goldhand_line_strategy(ticker, plot_title = 'Goldhand line Strategy'):
+def show_indicator_goldhand_line_strategy(ticker, plot_title = '', ndays=0, plot_height=800):
 
     data = GoldHand(ticker).df
 
@@ -134,9 +133,17 @@ def show_indicator_goldhand_line_strategy(ticker, plot_title = 'Goldhand line St
     ##### data prepar end
 
     ##### backtest
-    backtest = Backtest( data, goldhand_line_strategy, plot_title = 'Goldhand line Strategy' )
+    backtest = Backtest( data, goldhand_line_strategy, plot_title =plot_title)
     trades =backtest.trades
 
+    if ndays!=0:
+      data = data.tail(ndays)
+      trades = trades.loc[trades['buy_date']>data.date.min()]
+
+    if data['high'].max() >= max(data['high'][0:50]):
+        tex_loc = [0.1, 0.2]
+    else:
+        tex_loc = [0.1, 0.85]
 
     # base plot
     fig = go.Figure(data=go.Ohlc(x=data['date'], open=data['open'], high=data['high'], low=data['low'],close=data['close']))
@@ -227,22 +234,28 @@ def show_indicator_goldhand_line_strategy(ticker, plot_title = 'Goldhand line St
                                 font=dict(size=13, color=triangle_color, family="Times New Roman")))
 
     # Update layout
-    fig.update_layout(showlegend=False, plot_bgcolor='white', height=800, title=plot_title)
+    fig.update_layout(showlegend=False, plot_bgcolor='white', height=plot_height, title=plot_title)
     fig.update(layout_xaxis_rangeslider_visible=False)
 
-    # Update x-axes and y-axes for the main chart
-    fig.update_xaxes(mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey')
-    fig.update_yaxes(mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey')
 
-    # Update x-axes and y-axes for the RSI subplot
-    fig.update_xaxes(mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey')
-    fig.update_yaxes(mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey')
+    t= backtest.trades_summary
+    trade_text = f"Trades: {t['number_of_trades']}<br>"\
+    f"Win ratio: {t['win_ratio(%)']}%<br>"\
+    f"Average result: {t['average_res(%)']}%<br>"\
+    f"Median result: {t['median_res(%)']}%<br>"\
+    f"Average trade lenght: {round(t['average_trade_len(days)'], 0)} days<br>"\
+    f"Cumulative result: {round(t['cumulative_result'], 2)}x<br>"\
+    f"Profitable trades mean: {t['profitable_trades_mean']}%<br>"\
+    f"Profitable trades median: {t['profitable_trades_median']}%<br>"\
+    f"Looser trades mean: {t['looser_trades_mean']}%<br>"\
+    f"Looser trades median: {t['looser_trades_median']}%<br>"
 
-
-
+    # Add a larger textbox using annotations
+    fig.add_annotation( go.layout.Annotation( x=tex_loc[0], y=tex_loc[1], xref='paper', yref='paper', text=trade_text, showarrow=True, arrowhead=4, ax=0, ay=0, bordercolor='black', borderwidth=2, bgcolor='white', align='left', font=dict(size=14, color='black')))
 
     # Show the plot
     fig.show()
 
 
-#show_indicator_goldhand_line_strategy('TSLA', plot_title='sdgfsdg')
+#ticker= 'AAPL'
+#show_indicator_goldhand_line_strategy(ticker, plot_title=tw.get_plotly_title(ticker), ndays=700, plot_height=1000)

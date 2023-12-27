@@ -67,11 +67,22 @@ def rsi_strategy(data, buy_threshold = 30, sell_threshold = 70):
 
 
 
-def show_indicator_rsi_strategy(ticker, buy_threshold = 30, sell_threshold = 70, plot_title = 'RSI Strategy'):
+def show_indicator_rsi_strategy(ticker, buy_threshold = 30, sell_threshold = 70, plot_title = '', ndays=0, plot_height=800):
 
     tdf = GoldHand(ticker).df
     backtest = Backtest( tdf, rsi_strategy, buy_threshold=buy_threshold, sell_threshold=sell_threshold)
     trades =backtest.trades
+    
+    if ndays!=0:
+        tdf = data.tail(tdf)
+        trades = trades.loc[trades['buy_date']>tdf.date.min()]
+        
+    if data['high'].max() >= max(data['high'][0:50]):
+        tex_loc = [0.1, 0.2]
+    else:
+        tex_loc = [0.1, 0.85]
+
+    
 
     # Create subplots with shared x-axis and custom heights
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.1, subplot_titles=[plot_title, "RSI"], row_heights=[0.7, 0.3])
@@ -150,6 +161,21 @@ def show_indicator_rsi_strategy(ticker, buy_threshold = 30, sell_threshold = 70,
     fig.update_xaxes(mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey', row=2, col=1)
     fig.update_yaxes(mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey', row=2, col=1)
 
+
+    t= backtest.trades_summary
+    trade_text = f"Trades: {t['number_of_trades']}<br>"\
+    f"Win ratio: {t['win_ratio(%)']}%<br>"\
+    f"Average result: {t['average_res(%)']}%<br>"\
+    f"Median result: {t['median_res(%)']}%<br>"\
+    f"Average trade length: {round(t['average_trade_len(days)'], 0)} days<br>"\
+    f"Cumulative result: {round(t['cumulative_result'], 2)}x<br>"\
+    f"Profitable trades mean: {t['profitable_trades_mean']}%<br>"\
+    f"Profitable trades median: {t['profitable_trades_median']}%<br>"\
+    f"Looser trades mean: {t['looser_trades_mean']}%<br>"\
+    f"Looser trades median: {t['looser_trades_median']}%<br>"
+
+    # Add a larger textbox using annotations
+    fig.add_annotation( go.layout.Annotation( x=0.1, y=0.85, xref='paper', yref='paper', text=trade_text, showarrow=True, arrowhead=4, ax=0, ay=0, bordercolor='black', borderwidth=2, bgcolor='white', align='left', font=dict(size=14, color='black')))
 
 
 
