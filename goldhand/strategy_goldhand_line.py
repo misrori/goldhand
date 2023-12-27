@@ -254,7 +254,7 @@ def show_indicator_goldhand_line_strategy(ticker, plot_title = '', ndays=0, plot
     fig.add_annotation( go.layout.Annotation( x=tex_loc[0], y=tex_loc[1], xref='paper', yref='paper', text=trade_text, showarrow=True, arrowhead=4, ax=0, ay=0, bordercolor='black', borderwidth=2, bgcolor='white', align='left', font=dict(size=14, color='black')))
 
     # Show the plot
-    fig.show()
+    return (fig)
 
 
 #ticker= 'AAPL'

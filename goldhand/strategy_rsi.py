@@ -175,7 +175,7 @@ def show_indicator_rsi_strategy(ticker, buy_threshold = 30, sell_threshold = 70,
     f"Looser trades median: {t['looser_trades_median']}%<br>"
 
     # Add a larger textbox using annotations
-    fig.add_annotation( go.layout.Annotation( x=0.1, y=0.85, xref='paper', yref='paper', text=trade_text, showarrow=True, arrowhead=4, ax=0, ay=0, bordercolor='black', borderwidth=2, bgcolor='white', align='left', font=dict(size=14, color='black')))
+    fig.add_annotation( go.layout.Annotation( x=tex_loc[0], y=tex_loc[1], xref='paper', yref='paper', text=trade_text, showarrow=True, arrowhead=4, ax=0, ay=0, bordercolor='black', borderwidth=2, bgcolor='white', align='left', font=dict(size=14, color='black')))
 
 
 
@@ -186,7 +186,7 @@ def show_indicator_rsi_strategy(ticker, buy_threshold = 30, sell_threshold = 70,
 
 
     # Show the plot
-    fig.show()
+    return (fig)
 
 
 # Test
