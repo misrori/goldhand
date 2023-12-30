@@ -143,22 +143,22 @@ class GoldHand:
                 self.df.loc[states[i], 'local_text'] = f'{temj}{fall}%<br>${round(current_low, 2)}'
 
 
-    def plotly_last_year(self, plot_title, plot_height=900):
-        tdf = self.df.tail(500)
+    def plotly_last_year(self, plot_title, plot_height=900, ndays=500, ad_local_min_max=True):
+        tdf = self.df.tail(ndays)
 
         fig = go.Figure(data=go.Ohlc(x=tdf['date'], open=tdf['open'], high=tdf['high'], low=tdf['low'],close=tdf['close']))
+        if ad_local_min_max:
+            for index, row in tdf[tdf['local']!=''].iterrows():
+                direction = row['local']
+                tdate = row['date']
+                local_text = row['local_text']
+                min_price = row['low']
+                max_price = row['high']
+                if direction == 'maximum':
+                    fig.add_annotation( x=tdate, y=max_price, text=local_text, showarrow=True, align="center", bordercolor="#c7c7c7", font=dict(family="Courier New, monospace", size=16, color="#214e34" ), borderwidth=2, borderpad=4, bgcolor="#f4fdff", opacity=0.8, arrowhead=2, arrowsize=1, arrowwidth=1, ax=-45,ay=-45)
 
-        for index, row in tdf[tdf['local']!=''].iterrows():
-            direction = row['local']
-            tdate = row['date']
-            local_text = row['local_text']
-            min_price = row['low']
-            max_price = row['high']
-            if direction == 'maximum':
-                fig.add_annotation( x=tdate, y=max_price, text=local_text, showarrow=True, align="center", bordercolor="#c7c7c7", font=dict(family="Courier New, monospace", size=16, color="#214e34" ), borderwidth=2, borderpad=4, bgcolor="#f4fdff", opacity=0.8, arrowhead=2, arrowsize=1, arrowwidth=1, ax=-45,ay=-45)
-
-            if direction == 'minimum':
-                fig.add_annotation( x=tdate, y=min_price, text=local_text, showarrow=True, align="center", bordercolor="#c7c7c7", font=dict(family="Courier New, monospace", size=16, color="red" ), borderwidth=2, borderpad=4, bgcolor="#f4fdff", opacity=0.8, arrowhead=2, arrowsize=1, arrowwidth=1, ax=45,ay=45)
+                if direction == 'minimum':
+                    fig.add_annotation( x=tdate, y=min_price, text=local_text, showarrow=True, align="center", bordercolor="#c7c7c7", font=dict(family="Courier New, monospace", size=16, color="red" ), borderwidth=2, borderpad=4, bgcolor="#f4fdff", opacity=0.8, arrowhead=2, arrowsize=1, arrowwidth=1, ax=45,ay=45)
 
         fig.update_layout(showlegend=False, plot_bgcolor='white', height=plot_height, title= plot_title)
 
@@ -169,7 +169,7 @@ class GoldHand:
         fig.add_trace( go.Scatter(x=tdf['date'], y=tdf['sma_200'], opacity =0.7, line=dict(color='red', width = 2.5) ,  name = 'SMA 200') )
         return(fig)
 
-    def plot_goldhand_line(self, plot_title, plot_height=900):
+    def plot_goldhand_line(self, plot_title, plot_height=900, ndays=800,  ad_local_min_max=True):
         
         data = self.df.copy()
         # Apply SMMA to the dataframe
@@ -190,9 +190,22 @@ class GoldHand:
         # Create a 'group' column and increase the value only when there's a color change
         data['group'] = (data['color_change']).cumsum()
 
-        tdf = data.tail(800)
+        tdf = data.tail(ndays)
 
         fig = go.Figure(data=go.Ohlc(x=tdf['date'], open=tdf['open'], high=tdf['high'], low=tdf['low'],close=tdf['close']))
+        if ad_local_min_max:
+            for index, row in tdf[tdf['local']!=''].iterrows():
+                direction = row['local']
+                tdate = row['date']
+                local_text = row['local_text']
+                min_price = row['low']
+                max_price = row['high']
+                if direction == 'maximum':
+                    fig.add_annotation( x=tdate, y=max_price, text=local_text, showarrow=True, align="center", bordercolor="#c7c7c7", font=dict(family="Courier New, monospace", size=16, color="#214e34" ), borderwidth=2, borderpad=4, bgcolor="#f4fdff", opacity=0.8, arrowhead=2, arrowsize=1, arrowwidth=1, ax=-45,ay=-45)
+
+                if direction == 'minimum':
+                    fig.add_annotation( x=tdate, y=min_price, text=local_text, showarrow=True, align="center", bordercolor="#c7c7c7", font=dict(family="Courier New, monospace", size=16, color="red" ), borderwidth=2, borderpad=4, bgcolor="#f4fdff", opacity=0.8, arrowhead=2, arrowsize=1, arrowwidth=1, ax=45,ay=45)
+
 
         fig.update_xaxes( mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey' )
         fig.update_yaxes( mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey')

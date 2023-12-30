@@ -3,3 +3,6 @@ dist/*
 .venv/*
 goldhand.egg-info/*
 fig*
+__pycache__/*
+example/__pycache__/*
+goldhand/__pycache__/*

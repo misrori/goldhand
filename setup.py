@@ -8,7 +8,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name="goldhand",
-    version="13.5",
+    version="14.2",
     author="Mihaly",
     author_email="ormraat.pte@gmail.com",
     description="A package working with financial data",
