@@ -57,6 +57,7 @@ def rsi_strategy(data, buy_threshold = 30, sell_threshold = 70):
         all_trades.append(temp_trade)
 
     res_df = pd.DataFrame(all_trades)
+    
     # change orders
 
     all_col = res_df.columns.tolist()

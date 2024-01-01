@@ -16,12 +16,21 @@ class Backtest:
 
     def add_trades(self):
         self.trades = self.strategy_function(self.data, **self.additional_params)
+        self.trades['ticker'] = self.data['ticker'].iloc[0]
+        
+        # order columns
+        all_col = self.trades.columns.tolist()
+        first = ['ticker']
+        first.extend([x for x in all_col if x not in first])
+        self.trades = self.trades[first]
 
 
     def summary_of_trades(self):
         self.trades_summary = {
+          'ticker' : self.data['ticker'].iloc[0],
           'number_of_trades' : self.trades.shape[0],
-
+          'win_ratio(%)' : round(((sum(self.trades['result'] >1) / self.trades.shape[0])*100),2),
+          
           'average_res(%)' : round(((self.trades['result'].mean()-1)*100),2),
           'median_res(%)': round(((self.trades['result'].median()-1)*100),2),
           'cumulative_result': list(np.cumprod(self.trades['result'], axis=0))[-1],
@@ -41,7 +50,7 @@ class Backtest:
           'average_trade_len(days)' :  self.trades['days_in_trade'].mean(),
           'median_trade_len(days)' :  self.trades['days_in_trade'].median(),
 
-          'win_ratio(%)' : round(((sum(self.trades['result'] >1) / self.trades.shape[0])*100),2),
+
           'number_of_win_trades': sum(self.trades['result'] >1),
           'number_of_lost_trades': (self.trades.shape[0] - sum(self.trades['result'] >1)),
 
@@ -107,6 +116,6 @@ class Backtest:
 
 
     def summarize_strategy(self):
-        display(pd.DataFrame(self.trades_summary, index=['Strategy summary']).T)
+        display(pd.DataFrame(self.trades_summary, index=['Strategy summary']).T )
         self.show_trades().show()
         display(self.trades)
