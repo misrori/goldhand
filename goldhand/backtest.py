@@ -30,8 +30,10 @@ class Backtest:
           'ticker' : self.data['ticker'].iloc[0],
           'number_of_trades' : self.trades.shape[0],
           'win_ratio(%)' : round(((sum(self.trades['result'] >1) / self.trades.shape[0])*100),2),
-          
           'average_res(%)' : round(((self.trades['result'].mean()-1)*100),2),
+          'average_trade_len(days)' :  round(self.trades['days_in_trade'].mean(), 0),
+          
+          
           'median_res(%)': round(((self.trades['result'].median()-1)*100),2),
           'cumulative_result': list(np.cumprod(self.trades['result'], axis=0))[-1],
           'trade_results': ' # '.join([ str(round(((x-1)*100),2)) for x in self.trades['result']]),
@@ -46,8 +48,6 @@ class Backtest:
           'looser_trades_mean' : round((( np.mean([x for x in self.trades['result'] if x<1])-1)*100),2),
           'looser_trades_median' : round((( np.median([x for x in self.trades['result'] if x<1])-1)*100),2),
 
-
-          'average_trade_len(days)' :  self.trades['days_in_trade'].mean(),
           'median_trade_len(days)' :  self.trades['days_in_trade'].median(),
 
 

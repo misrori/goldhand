@@ -9,6 +9,13 @@ from goldhand import *
 
 
 def goldhand_line_strategy(data):
+    """
+    This function implements the goldhand line strategy.
+    Parameters:
+    data (pandas.DataFrame): The dataframe containing the data.
+    Returns:
+    res_df (pandas.DataFrame): The dataframe containing the results.
+    """
 
     data['hl2'] = (data['high'] + data['low'])/2
 
@@ -91,7 +98,18 @@ def goldhand_line_strategy(data):
     return(res_df)
 
 
-def show_indicator_goldhand_line_strategy(ticker, plot_title = '', ndays=0, plot_height=800):
+def show_indicator_goldhand_line_strategy(ticker, plot_title = '', ndays=0, plot_height=1000, add_strategy_summary = True):
+    """
+    This function shows the goldhand line strategy on a plotly candlestick chart.   
+    Parameters:
+    ticker (str): The ticker of the stock or ETF.
+    plot_title (str): The title of the plot.
+    ndays (int): The number of days to show. If 0, all data will be shown.
+    plot_height (int): The height of the plot.
+    add_strategy_summary (bool): If True, the strategy summary will be added to the plot.
+    Returns:
+    fig (plotly.graph_objects.Figure): The plotly figure.
+    """
 
     data = GoldHand(ticker).df
 
@@ -237,21 +255,21 @@ def show_indicator_goldhand_line_strategy(ticker, plot_title = '', ndays=0, plot
     fig.update_layout(showlegend=False, plot_bgcolor='white', height=plot_height, title=plot_title)
     fig.update(layout_xaxis_rangeslider_visible=False)
 
+    if add_strategy_summary:
+        t= backtest.trades_summary
+        trade_text = f"Trades: {t['number_of_trades']}<br>"\
+        f"Win ratio: {t['win_ratio(%)']}%<br>"\
+        f"Average result: {t['average_res(%)']}%<br>"\
+        f"Median result: {t['median_res(%)']}%<br>"\
+        f"Average trade lenght: {round(t['average_trade_len(days)'], 0)} days<br>"\
+        f"Cumulative result: {round(t['cumulative_result'], 2)}x<br>"\
+        f"Profitable trades mean: {t['profitable_trades_mean']}%<br>"\
+        f"Profitable trades median: {t['profitable_trades_median']}%<br>"\
+        f"Looser trades mean: {t['looser_trades_mean']}%<br>"\
+        f"Looser trades median: {t['looser_trades_median']}%<br>"
 
-    t= backtest.trades_summary
-    trade_text = f"Trades: {t['number_of_trades']}<br>"\
-    f"Win ratio: {t['win_ratio(%)']}%<br>"\
-    f"Average result: {t['average_res(%)']}%<br>"\
-    f"Median result: {t['median_res(%)']}%<br>"\
-    f"Average trade lenght: {round(t['average_trade_len(days)'], 0)} days<br>"\
-    f"Cumulative result: {round(t['cumulative_result'], 2)}x<br>"\
-    f"Profitable trades mean: {t['profitable_trades_mean']}%<br>"\
-    f"Profitable trades median: {t['profitable_trades_median']}%<br>"\
-    f"Looser trades mean: {t['looser_trades_mean']}%<br>"\
-    f"Looser trades median: {t['looser_trades_median']}%<br>"
-
-    # Add a larger textbox using annotations
-    fig.add_annotation( go.layout.Annotation( x=tex_loc[0], y=tex_loc[1], xref='paper', yref='paper', text=trade_text, showarrow=True, arrowhead=4, ax=0, ay=0, bordercolor='black', borderwidth=2, bgcolor='white', align='left', font=dict(size=14, color='black')))
+        # Add a larger textbox using annotations
+        fig.add_annotation( go.layout.Annotation( x=tex_loc[0], y=tex_loc[1], xref='paper', yref='paper', text=trade_text, showarrow=True, arrowhead=4, ax=0, ay=0, bordercolor='black', borderwidth=2, bgcolor='white', align='left', font=dict(size=14, color='black')))
 
     # Show the plot
     return (fig)

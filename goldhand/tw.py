@@ -92,7 +92,9 @@ class Tw:
 
         secdf.rename(columns = {'description': 'Company'}, inplace=True)
 
-        fig = px.bar(secdf, x='name', y='market_cap_basic', title = f"{row_df['Company'].iloc[0]} ({row_df['name'].iloc[0]})<br>{row_df['sector'].iloc[0]} | {row_df['industry'].iloc[0]}", labels={'market_cap_basic':'Market kapitalization'}, text='Company')
+        #fig = px.bar(secdf, x='name', y='market_cap_basic', title = f"{row_df['Company'].iloc[0]} ({row_df['name'].iloc[0]})<br>{row_df['sector'].iloc[0]} | {row_df['industry'].iloc[0]}", labels={'market_cap_basic':'Market kapitalization'}, text='Company')
+
+        fig = px.bar(secdf, x='name', y='market_cap_basic', title = self.get_plotly_title(ticker), labels={'market_cap_basic':'Market kapitalization'}, text='Company')
 
         fig.add_annotation( x=row_df['name'].iloc[0], y=row_df['market_cap_basic'].iloc[0], text= f"{market_cap}",  showarrow=True, align="center", bordercolor="#c7c7c7", font=dict(family="Courier New, monospace", size=16, color="#214e34" ), borderwidth=2, borderpad=4, bgcolor="#f4fdff", opacity=0.8, arrowhead=2, arrowsize=1, arrowwidth=1, ax=65,ay=-45)
         fig.update_layout(showlegend=False, plot_bgcolor='white', height=600)
@@ -110,7 +112,7 @@ class Tw:
 
         inddf.rename(columns = {'description': 'Company'}, inplace=True)
 
-        fig = px.bar(inddf, x='name', y='market_cap_basic', title = f"{row_df['Company'].iloc[0]} ({row_df['name'].iloc[0]})<br>{row_df['sector'].iloc[0]} | {row_df['industry'].iloc[0]}", labels={'market_cap_basic':'Market kapitalization'}, text='Company')
+        fig = px.bar(inddf, x='name', y='market_cap_basic', title = self.get_plotly_title(ticker), labels={'market_cap_basic':'Market kapitalization'}, text='Company')
 
 
         fig.add_annotation( x=row_df['name'].iloc[0], y=row_df['market_cap_basic'].iloc[0], text= f"{market_cap}",  showarrow=True, align="center", bordercolor="#c7c7c7", font=dict(family="Courier New, monospace", size=16, color="#214e34" ), borderwidth=2, borderpad=4, bgcolor="#f4fdff", opacity=0.8, arrowhead=2, arrowsize=1, arrowwidth=1, ax=65,ay=-45)
