@@ -2,15 +2,26 @@ from goldhand import *
 import pandas as pd
 from tqdm import tqdm
 tw =Tw()
-tw.stock.head(1).T
-tw.crypto.head(1).T
+
+
+
+ticker = 'TSLA'
+
+data = GoldHand(ticker).df
+
+backtest = Backtest( data, goldhand_line_strategy, buy_at='gold', sell_at='grey')
+
+backtest.show_trades().show()
+
+p = show_indicator_goldhand_line_strategy(ticker, plot_title=tw.get_plotly_title(ticker), ndays=700, plot_height=1000,  buy_at='gold', sell_at='grey', add_strategy_summary=True)
+p.show()
+
 
 
 #show_indicator_rsi_strategy(ticker = 'TSLA', buy_threshold = 30, sell_threshold= 80, plot_title=tw.get_plotly_title('TSLA'), ndays=800).show()
 
 
-ticker = 'TSLA'
-tw.get_sec_plot(ticker)
+
 
 #t = GoldHand(ticker)
 #p = t.plot_goldhand_line(plot_title=tw.get_plotly_title(ticker), ndays=800, plot_height=1000, ad_local_min_max=False)
@@ -35,12 +46,12 @@ tw.get_sec_plot(ticker)
 
 #backtest = Backtest( data, rsi_strategy, buy_threshold=29, sell_threshold=70)
 
-#backtest.show_trades().show()
+#backtest.show_trades()
 
-
-#ticker= 'COIN'
-#p = show_indicator_goldhand_line_strategy(ticker, plot_title=tw.get_plotly_title(ticker), ndays=700, plot_height=1000)
+#p = show_indicator_rsi_strategy(ticker, plot_title=tw.get_plotly_title(ticker), ndays=700, plot_height=1000, buy_threshold=25, sell_threshold=80, add_strategy_summary=True)
 #p.show()
+
+
 
 #stock_ticker = "AMD"
 #t = GoldHand(stock_ticker)

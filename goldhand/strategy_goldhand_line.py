@@ -110,7 +110,7 @@ def goldhand_line_strategy(data, buy_at='gold', sell_at='grey'):
     return(res_df)
 
 
-def show_indicator_goldhand_line_strategy(ticker, plot_title = '', ndays=0, plot_height=1000, add_strategy_summary = True):
+def show_indicator_goldhand_line_strategy(ticker, plot_title = '', buy_at='gold', sell_at='grey', ndays=0, plot_height=1000, add_strategy_summary = True):
     """
     This function shows the goldhand line strategy on a plotly candlestick chart.   
     Parameters:
@@ -162,7 +162,7 @@ def show_indicator_goldhand_line_strategy(ticker, plot_title = '', ndays=0, plot
     ##### data prepar end
 
     ##### backtest
-    backtest = Backtest( data, goldhand_line_strategy, plot_title =plot_title)
+    backtest = Backtest( data, goldhand_line_strategy, plot_title =plot_title, buy_at='gold', sell_at='grey')
     trades =backtest.trades
 
     if ndays!=0:
