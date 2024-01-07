@@ -6,38 +6,11 @@ tw.stock.head(1).T
 tw.crypto.head(1).T
 
 
-
-all_trades = []
-all_trades_summaries=[]
-
-for ticker in tqdm(tw.stock['name'][0:3]):
-    try:
-        data = GoldHand(ticker).df
-
-        # backtest
-        backtest = Backtest( data, rsi_strategy, plot_title=tw.get_plotly_title(ticker))
-
-        # results of backtest
-        trades = backtest.trades
-        trades_summary= backtest.trades_summary
-
-        # append results
-        all_trades.append(trades)
-        all_trades_summaries.append(trades_summary)
-
-    except:
-        pass
+#show_indicator_rsi_strategy(ticker = 'TSLA', buy_threshold = 30, sell_threshold= 80, plot_title=tw.get_plotly_title('TSLA'), ndays=800).show()
 
 
-tradesdf = pd.concat(all_trades, ignore_index=True)
-trades_summarydf = pd.DataFrame(all_trades_summaries)
-
-
-
-print(tradesdf)
-print(trades_summarydf)
-
-#ticker = 'TSLA'#
+ticker = 'TSLA'
+tw.get_sec_plot(ticker)
 
 #t = GoldHand(ticker)
 #p = t.plot_goldhand_line(plot_title=tw.get_plotly_title(ticker), ndays=800, plot_height=1000, ad_local_min_max=False)

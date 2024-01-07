@@ -20,33 +20,43 @@ def rsi_strategy(data, buy_threshold = 30, sell_threshold = 70):
         # Check if not already in a trade
         if not in_trade:
             # Generate buy signal
+            #You have to change olne the buy and sell signal
             if data['rsi'][i] < buy_threshold:
 
-                temp_trade['buy_price'] = data['close'][i]
+                if i == (len(data) -1): 
+                    temp_trade['buy_price'] = data['close'][i]
+                    temp_trade.update(dict(data.iloc[i].add_prefix('buy_')))
+                else:
+                    temp_trade['buy_price'] = data['open'][i+1]
+                    temp_trade.update(dict(data.iloc[i+1].add_prefix('buy_')))
+
                 temp_trade['trade_id'] = trade_id
                 temp_trade['status'] = 'open'
-                temp_trade.update(dict(data.iloc[i].add_prefix('buy_')))
                 in_trade = True  # Set flag to indicate in a trade
         else:
             # Generate sell signal
+            #You have to change olne the buy and sell signal
             if data['rsi'][i] > sell_threshold:
-
-                temp_trade['sell_price'] = data['close'][i]
+                if i == (len(data) -1): 
+                    temp_trade['sell_price'] = data['close'][i]
+                    temp_trade.update(dict(data.iloc[i].add_prefix('sell_')))
+                else:
+                    temp_trade['sell_price'] = data['open'][i+1]
+                    temp_trade.update(dict(data.iloc[i+1].add_prefix('sell_')))
+                                       
                 temp_trade['trade_id'] = trade_id
                 temp_trade['status'] = 'closed'
 
-                temp_trade.update(dict(data.iloc[i].add_prefix('sell_')))
-
+                
                 # calculate results
                 temp_trade['result'] = temp_trade['sell_price'] / temp_trade['buy_price']
                 temp_trade['days_in_trade'] = (temp_trade['sell_date'] - temp_trade['buy_date']).days
-
-
 
                 in_trade = False  # Reset flag to indicate not in a trade
                 trade_id +=1
                 all_trades.append(temp_trade)
                 temp_trade = {}
+                
     if temp_trade:
         temp_trade['sell_price'] = data['close'][i]
         temp_trade['trade_id'] = trade_id
@@ -59,7 +69,6 @@ def rsi_strategy(data, buy_threshold = 30, sell_threshold = 70):
     res_df = pd.DataFrame(all_trades)
     
     # change orders
-
     all_col = res_df.columns.tolist()
     first = ['result', 'buy_price', 'sell_price', 'buy_date', 'sell_date', 'days_in_trade']
     first.extend([x for x in all_col if x not in first])

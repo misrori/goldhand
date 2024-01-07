@@ -8,11 +8,13 @@ from goldhand import *
 
 
 
-def goldhand_line_strategy(data):
+def goldhand_line_strategy(data, buy_at='gold', sell_at='grey'):
     """
     This function implements the goldhand line strategy.
     Parameters:
     data (pandas.DataFrame): The dataframe containing the data.
+    buy_at (str): The color of the line to buy at. Default is 'gold'.
+    sell_at (str): The color of the line to sell at. Default is 'grey'.
     Returns:
     res_df (pandas.DataFrame): The dataframe containing the results.
     """
@@ -52,22 +54,32 @@ def goldhand_line_strategy(data):
         # Check if not already in a trade
         if not in_trade:
             # Generate buy signal
-            if (data['color'][i] =='gold') :
+            if (data['color'][i] ==buy_at) :
 
-                temp_trade['buy_price'] = data['close'][i]
+                if i == (len(data) -1): 
+                    temp_trade['buy_price'] = data['close'][i]
+                    temp_trade.update(dict(data.iloc[i].add_prefix('buy_')))
+                else:
+                    temp_trade['buy_price'] = data['open'][i+1]
+                    temp_trade.update(dict(data.iloc[i+1].add_prefix('buy_')))
+                
+                
                 temp_trade['trade_id'] = trade_id
                 temp_trade['status'] = 'open'
-                temp_trade.update(dict(data.iloc[i].add_prefix('buy_')))
                 in_trade = True  # Set flag to indicate in a trade
         else:
             # Generate sell signal
-            if (data['color'][i] =='grey') :
+            if (data['color'][i] ==sell_at) :
 
-                temp_trade['sell_price'] = data['close'][i]
+                if i == (len(data) -1): 
+                    temp_trade['sell_price'] = data['close'][i]
+                    temp_trade.update(dict(data.iloc[i].add_prefix('sell_')))
+                else:
+                    temp_trade['sell_price'] = data['open'][i+1]
+                    temp_trade.update(dict(data.iloc[i+1].add_prefix('sell_')))
+                
                 temp_trade['trade_id'] = trade_id
                 temp_trade['status'] = 'closed'
-
-                temp_trade.update(dict(data.iloc[i].add_prefix('sell_')))
 
                 # calculate results
                 temp_trade['result'] = temp_trade['sell_price'] / temp_trade['buy_price']
@@ -146,7 +158,6 @@ def show_indicator_goldhand_line_strategy(ticker, plot_title = '', ndays=0, plot
 
     # Create a 'group' column and increase the value only when there's a color change
     data['group'] = (data['color_change']).cumsum()
-
 
     ##### data prepar end
 

@@ -21,6 +21,9 @@ class GoldHand:
 
 
     def get_olhc(self):
+        """
+        Download historical stock data for the last year
+        """
         #scraper = cloudscraper.create_scraper()
         response = self.scraper.get(f"https://query1.finance.yahoo.com/v8/finance/chart/{self.ticker}?interval={self.interval}&range={self.range}")
         t= response.json()
@@ -32,6 +35,9 @@ class GoldHand:
         return(df)
     
     def smma(self, data, window, colname):
+        """
+        Calculate Smoothed Moving Average (SMMA)
+        """
         hl2 = data['hl2'].values
         smma_values = [hl2[0]]
 
@@ -141,7 +147,7 @@ class GoldHand:
                 else:
                     temj = '😭💔' 
                 self.df.loc[states[i], 'local_text'] = f'{temj}{fall}%<br>${round(current_low, 2)}'
-
+        self.df.reset_index(inplace=True, drop=True)
 
     def plotly_last_year(self, plot_title, plot_height=900, ndays=500, ad_local_min_max=True):
         tdf = self.df.tail(ndays)
