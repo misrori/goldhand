@@ -6,7 +6,6 @@ pip install goldhand
 ```
 
 
-
 # TradingView
 
 
@@ -21,11 +20,15 @@ tw.stock
 
 # data frame of the top 300 crypto currency
 tw.crypto
+
+# data frame of the top 3000 etf
+tw.etf
+
 ```
 
 ```python
 # Get a plot of the stock to see the location in the sector 
-tw.get_sec_plot('AMD')
+tw.get_sec_plot('AMD').show()
 
 ```
 ![Sector plot](https://github.com/misrori/goldhand/blob/main/img/sec_plot.png?raw=true "Sector location of FDS")
@@ -33,7 +36,7 @@ tw.get_sec_plot('AMD')
 
 ```python
 # Get a plot of the stock to see the location in the industry 
-tw.get_sec_plot('AMD')
+tw.get_sec_plot('AMD').show()
 
 ```
 ![Sector plot](https://github.com/misrori/goldhand/blob/main/img/ind_plot.png?raw=true  "Sector location of FDS")

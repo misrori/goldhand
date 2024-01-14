@@ -11,6 +11,15 @@ import cloudscraper
 
 class GoldHand:
     def __init__(self, ticker, ad_ticker=True, range='18y', interval='1d'):
+        """
+        GoldHand class to download and analyze stock data
+        params:
+        ticker: str, ticker symbol
+        ad_ticker: bool, add ticker column to the dataframe
+        range: str, time range to download data
+        interval: str, interval to download data
+        
+        """
         self.scraper = cloudscraper.create_scraper()
         self.ad_ticker = ad_ticker
         self.range = range
@@ -23,6 +32,7 @@ class GoldHand:
     def get_olhc(self):
         """
         Download historical stock data for the last year
+        # https://cryptocointracker.com/yahoo-finance/yahoo-finance-api
         """
         #scraper = cloudscraper.create_scraper()
         response = self.scraper.get(f"https://query1.finance.yahoo.com/v8/finance/chart/{self.ticker}?interval={self.interval}&range={self.range}")
@@ -37,6 +47,12 @@ class GoldHand:
     def smma(self, data, window, colname):
         """
         Calculate Smoothed Moving Average (SMMA)
+        params:
+        data: dataframe
+        window: int, window size
+        colname: str, name of the column to add to the dataframe
+        return:
+        data: dataframe with added column
         """
         hl2 = data['hl2'].values
         smma_values = [hl2[0]]
@@ -51,105 +67,120 @@ class GoldHand:
 
 
     def download_historical_data(self):
+        """
+        Download historical stock data of 18 years
+        """
         # Download historical stock data for the last year
         self.df = self.get_olhc()
         self.df.columns = self.df.columns.str.lower()
         self.df['hl2'] = (self.df['high'] + self.df['low'])/2
         
-        # Rsi
-        self.df['rsi'] = ta.rsi(self.df['close'], 14)
+        try:
+            # Rsi
+            self.df['rsi'] = ta.rsi(self.df['close'], 14)
 
-        # SMAS
-        self.df['sma_50']= ta.sma(self.df['close'], 50)
-        self.df['diff_sma50'] = (self.df['close']/self.df['sma_50'] -1)*100
-        self.df['sma_100']= ta.sma(self.df['close'], 100)
-        self.df['diff_sma100'] = (self.df['close']/self.df['sma_100'] -1)*100
-        self.df['sma_200']= ta.sma(self.df['close'], 200)
-        self.df['diff_sma200'] = (self.df['close']/self.df['sma_200'] -1)*100
+            # SMAS
+            self.df['sma_50']= ta.sma(self.df['close'], 50)
+            self.df['diff_sma50'] = (self.df['close']/self.df['sma_50'] -1)*100
+            self.df['sma_100']= ta.sma(self.df['close'], 100)
+            self.df['diff_sma100'] = (self.df['close']/self.df['sma_100'] -1)*100
+            self.df['sma_200']= ta.sma(self.df['close'], 200)
+            self.df['diff_sma200'] = (self.df['close']/self.df['sma_200'] -1)*100
 
-        #Bolinger bands
-        bb = ta.bbands(self.df['close'])
-        bb.columns = ['bb_lower', 'bb_mid', 'bb_upper', 'bandwidth', 'percent']
-        self.df['bb_lower'] = bb['bb_lower']
-        self.df['bb_upper'] = bb['bb_upper']
-        self.df['diff_upper_bb'] = (self.df['bb_upper']/self.df['close'] -1)*100
-        self.df['diff_lower_bb'] = (self.df['bb_lower']/self.df['close'] -1)*100
+            #Bolinger bands
+            bb = ta.bbands(self.df['close'])
+            bb.columns = ['bb_lower', 'bb_mid', 'bb_upper', 'bandwidth', 'percent']
+            self.df['bb_lower'] = bb['bb_lower']
+            self.df['bb_upper'] = bb['bb_upper']
+            self.df['diff_upper_bb'] = (self.df['bb_upper']/self.df['close'] -1)*100
+            self.df['diff_lower_bb'] = (self.df['bb_lower']/self.df['close'] -1)*100
 
-        #local min maxs
-        self.df['local'] = ''
-        self.df['local_text'] = ''
-        max_ids = list(argrelextrema(self.df['high'].values, np.greater, order=30)[0])
-        min_ids = list(argrelextrema(self.df['low'].values, np.less, order=30)[0])
-        self.df.loc[min_ids, 'local'] = 'minimum'
-        self.df.loc[max_ids, 'local'] = 'maximum'
+            #local min maxs
+            self.df['local'] = ''
+            self.df['local_text'] = ''
+            max_ids = list(argrelextrema(self.df['high'].values, np.greater, order=30)[0])
+            min_ids = list(argrelextrema(self.df['low'].values, np.less, order=30)[0])
+            self.df.loc[min_ids, 'local'] = 'minimum'
+            self.df.loc[max_ids, 'local'] = 'maximum'
 
 
-        states = self.df[self.df['local']!='']['local'].index.to_list()
-        problem = []
-        problem_list = []
-        for i in range(0, (len(states)-1) ):
+            states = self.df[self.df['local']!='']['local'].index.to_list()
+            problem = []
+            for i in range(0, (len(states)-1) ):
 
-            if (self.df.loc[states[i], 'local'] != self.df.loc[states[i+1], 'local']):
-                if (len(problem)==0):
-                    continue
+                if (self.df.loc[states[i], 'local'] != self.df.loc[states[i+1], 'local']):
+                    if (len(problem)==0):
+                        continue
+                    else:
+                        problem.append(states[i])
+                        text = self.df.loc[states[i], 'local']
+                        if(text=='minimum'):
+                            real_min = self.df.loc[problem, 'low'].idxmin()
+                            problem.remove(real_min)
+                            self.df.loc[problem, 'local']=''
+                        else:
+                            real_max = self.df.loc[problem, 'high'].idxmax()
+                            problem.remove(real_max)
+                            self.df.loc[problem, 'local']=''
+
+                        problem = []
                 else:
                     problem.append(states[i])
-                    text = self.df.loc[states[i], 'local']
-                    if(text=='minimum'):
-                        real_min = self.df.loc[problem, 'low'].idxmin()
-                        problem.remove(real_min)
-                        self.df.loc[problem, 'local']=''
+
+            states = self.df[self.df['local']!='']['local'].index.to_list()
+
+            # if first is min ad the price
+            if self.df.loc[states[0], 'local']== 'minimum':
+                self.df.loc[states[0],'local_text'] = f"${round(self.df.loc[states[0], 'low'], 2)}"
+            else:
+                self.df.loc[states[0],'local_text'] = f"${round(self.df.loc[states[0], 'high'], 2)}"
+
+            # add last fall if last local is max
+            if list(self.df[self.df['local']!='']['local'])[-1]=='maximum':
+                last_min_id = self.df.loc[self.df['low']==min(self.df['low'][-3:] )].index.to_list()[0]
+                self.df.loc[last_min_id , 'local'] = 'minimum'
+
+            states = self.df[self.df['local']!='']['local'].index.to_list()
+            
+            
+            for i in range(1,len(states)):
+                prev = self.df.loc[states[i-1], 'local']
+                current= self.df.loc[states[i], 'local']
+                prev_high = self.df.loc[states[i-1], 'high']
+                prev_low = self.df.loc[states[i-1], 'low']
+                current_high = self.df.loc[states[i], 'high']
+                current_low = self.df.loc[states[i], 'low']
+                if current == 'maximum':
+                    # rise
+                    rise = (current_high/ prev_low -1)*100
+                    if rise>100:
+                        self.df.loc[states[i], 'local_text'] = f'🚀🌌{round(((rise+100)/100), 2)}x<br>${round(current_high, 2)}'
                     else:
-                        real_max = self.df.loc[problem, 'high'].idxmax()
-                        problem.remove(real_max)
-                        self.df.loc[problem, 'local']=''
-
-                    problem = []
-            else:
-                problem.append(states[i])
-
-        states = self.df[self.df['local']!='']['local'].index.to_list()
-
-        # if first is min ad the price
-        if self.df.loc[states[0], 'local']== 'minimum':
-            self.df.loc[states[0],'local_text'] = f"${round(self.df.loc[states[0], 'low'], 2)}"
-        else:
-            self.df.loc[states[0],'local_text'] = f"${round(self.df.loc[states[0], 'high'], 2)}"
-
-        # add last fall if last local is max
-        if list(self.df[self.df['local']!='']['local'])[-1]=='maximum':
-            last_min_id = self.df.loc[self.df['low']==min(self.df['low'][-3:] )].index.to_list()[0]
-            self.df.loc[last_min_id , 'local'] = 'minimum'
-
-        states = self.df[self.df['local']!='']['local'].index.to_list()
-        
-        
-        for i in range(1,len(states)):
-            prev = self.df.loc[states[i-1], 'local']
-            current= self.df.loc[states[i], 'local']
-            prev_high = self.df.loc[states[i-1], 'high']
-            prev_low = self.df.loc[states[i-1], 'low']
-            current_high = self.df.loc[states[i], 'high']
-            current_low = self.df.loc[states[i], 'low']
-            if current == 'maximum':
-                # rise
-                rise = (current_high/ prev_low -1)*100
-                if rise>100:
-                    self.df.loc[states[i], 'local_text'] = f'🚀🌌{round(((rise+100)/100), 2)}x<br>${round(current_high, 2)}'
+                        self.df.loc[states[i], 'local_text'] = f'🚀{round(rise, 2)}%<br>${round(current_high, 2)}'
                 else:
-                    self.df.loc[states[i], 'local_text'] = f'🚀{round(rise, 2)}%<br>${round(current_high, 2)}'
-            else:
-                fall = round((1-(current_low / prev_high))*100, 2)
-                if fall < 30:
-                    temj = '💸'
-                elif fall < 50:
-                    temj = '💸'
-                else:
-                    temj = '😭💔' 
-                self.df.loc[states[i], 'local_text'] = f'{temj}{fall}%<br>${round(current_low, 2)}'
-        self.df.reset_index(inplace=True, drop=True)
+                    fall = round((1-(current_low / prev_high))*100, 2)
+                    if fall < 30:
+                        temj = '💸'
+                    elif fall < 50:
+                        temj = '💸'
+                    else:
+                        temj = '😭💔' 
+                    self.df.loc[states[i], 'local_text'] = f'{temj}{fall}%<br>${round(current_low, 2)}'
+            self.df.reset_index(inplace=True, drop=True)
+        except:
+            pass
 
     def plotly_last_year(self, plot_title, plot_height=900, ndays=500, ad_local_min_max=True):
+        """
+        Plot last year interactive plot of a stock analyzing the local minimums and maximums
+        params:
+        plot_title: str, title of the plot
+        plot_height: int, height of the plot
+        ndays: int, number of days to plot
+        ad_local_min_max: bool, add local min max to the plot
+        return:
+        fig: plotly figure
+        """
         tdf = self.df.tail(ndays)
 
         fig = go.Figure(data=go.Ohlc(x=tdf['date'], open=tdf['open'], high=tdf['high'], low=tdf['low'],close=tdf['close']))
@@ -176,6 +207,16 @@ class GoldHand:
         return(fig)
 
     def plot_goldhand_line(self, plot_title, plot_height=900, ndays=800,  ad_local_min_max=True):
+        """
+        Plot last year interactive plot of a stock analyzing the local minimums and maximums using the goldhand line indicator
+        params:
+        plot_title: str, title of the plot
+        plot_height: int, height of the plot
+        ndays: int, number of days to plot
+        ad_local_min_max: bool, add local min max to the plot
+        return:
+        fig: plotly figure
+        """
         
         data = self.df.copy()
         # Apply SMMA to the dataframe

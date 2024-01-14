@@ -57,7 +57,12 @@ class Backtest:
           'max_gain(%)' : round(((self.trades['result'].max()-1)*100),2),
           'max_lost(%)' : round(((self.trades['result'].min()-1)*100),2),
 
-          'first_trade_buy' : min(self.trades['buy_date'])
+          'first_trade_buy' : min(self.trades['buy_date']),
+          'first_close_price' : self.data['close'].iloc[0],
+          'first_date' : self.data['date'].iloc[0],
+          'last_price' : self.data['close'].iloc[-1],
+          'hold_result' : round(((self.data['close'].iloc[-1] / self.data['close'].iloc[0])-1)*100,2)
+          
 
         }
         self.trades_summary.update(self.additional_params)
