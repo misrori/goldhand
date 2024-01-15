@@ -13,12 +13,12 @@ class GoldHand:
     def __init__(self, ticker, ad_ticker=True, range='18y', interval='1d'):
         """
         GoldHand class to download and analyze stock data
-        params:
-        ticker: str, ticker symbol
-        ad_ticker: bool, add ticker column to the dataframe
-        range: str, time range to download data
-        interval: str, interval to download data
-        
+
+        Paramseters:
+        - ticker: str, ticker symbol of the stocks or crypto or ETF
+        - ad_ticker: bool, add ticker column to the DataFrame
+        - range: str, time range to download data for example 5y,1y, 1mo, 1d, 1h
+        - interval: str, interval to download data for example 1d, 1h, 5m
         """
         self.scraper = cloudscraper.create_scraper()
         self.ad_ticker = ad_ticker
@@ -31,8 +31,8 @@ class GoldHand:
 
     def get_olhc(self):
         """
-        Download historical stock data for the last year
-        # https://cryptocointracker.com/yahoo-finance/yahoo-finance-api
+        Download historical stock, crypto or ETF data from yahoo finance
+        API documentation location: https://cryptocointracker.com/yahoo-finance/yahoo-finance-api
         """
         #scraper = cloudscraper.create_scraper()
         response = self.scraper.get(f"https://query1.finance.yahoo.com/v8/finance/chart/{self.ticker}?interval={self.interval}&range={self.range}")
@@ -46,13 +46,13 @@ class GoldHand:
     
     def smma(self, data, window, colname):
         """
-        Calculate Smoothed Moving Average (SMMA)
-        params:
-        data: dataframe
-        window: int, window size
-        colname: str, name of the column to add to the dataframe
-        return:
-        data: dataframe with added column
+        Calculate Smoothed Simple Moving Average (SMMA)
+        Parameters:
+        - data: Pandas DataFrame
+        - window: int, window size
+        - colname: str, name of the column to add to the DataFrame
+        
+        Return: DataFrame with added column
         """
         hl2 = data['hl2'].values
         smma_values = [hl2[0]]
@@ -68,7 +68,7 @@ class GoldHand:
 
     def download_historical_data(self):
         """
-        Download historical stock data of 18 years
+        Download historical stock, crypto or ETF data 
         """
         # Download historical stock data for the last year
         self.df = self.get_olhc()
@@ -173,13 +173,12 @@ class GoldHand:
     def plotly_last_year(self, plot_title, plot_height=900, ndays=500, ad_local_min_max=True):
         """
         Plot last year interactive plot of a stock analyzing the local minimums and maximums
-        params:
-        plot_title: str, title of the plot
-        plot_height: int, height of the plot
-        ndays: int, number of days to plot
-        ad_local_min_max: bool, add local min max to the plot
-        return:
-        fig: plotly figure
+        Parameters:
+        - plot_title: str, title of the plot
+        - plot_height: int, height of the plot
+        - ndays: int, number of days to plot
+        - ad_local_min_max: bool, add local min max to the plot
+        Return: plotly figure
         """
         tdf = self.df.tail(ndays)
 
@@ -208,14 +207,13 @@ class GoldHand:
 
     def plot_goldhand_line(self, plot_title, plot_height=900, ndays=800,  ad_local_min_max=True):
         """
-        Plot last year interactive plot of a stock analyzing the local minimums and maximums using the goldhand line indicator
-        params:
-        plot_title: str, title of the plot
-        plot_height: int, height of the plot
-        ndays: int, number of days to plot
-        ad_local_min_max: bool, add local min max to the plot
-        return:
-        fig: plotly figure
+        Plot last year interactive plot of a stock analyzing the local minimums and maximums using the GoldHandLine indicator
+        Parameters:
+        - plot_title: str, title of the plot
+        - plot_height: int, height of the plot
+        - ndays: int, number of days to plot
+        - ad_local_min_max: bool, add local min max to the plot
+        Return: plotly figure
         """
         
         data = self.df.copy()

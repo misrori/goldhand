@@ -10,13 +10,14 @@ from goldhand import *
 
 def goldhand_line_strategy(data, buy_at='gold', sell_at='grey'):
     """
-    This function implements the goldhand line strategy.
+    This function implements the GoldHandLine strategy.
+    
     Parameters:
-    data (pandas.DataFrame): The dataframe containing the data.
-    buy_at (str): The color of the line to buy at. Default is 'gold'.
-    sell_at (str): The color of the line to sell at. Default is 'grey'.
-    Returns:
-    res_df (pandas.DataFrame): The dataframe containing the results.
+    - data (pandas DataFrame) : The DataFrame containing the data.
+    - buy_at (str): The color of the line to buy at. Default is 'gold'.
+    - sell_at (str): The color of the line to sell at. Default is 'grey'.
+    
+    Returns: The trades of the GoldHandLine strategy. 
     """
 
     data['hl2'] = (data['high'] + data['low'])/2
@@ -112,15 +113,18 @@ def goldhand_line_strategy(data, buy_at='gold', sell_at='grey'):
 
 def show_indicator_goldhand_line_strategy(ticker, plot_title = '', buy_at='gold', sell_at='grey', ndays=0, plot_height=1000, add_strategy_summary = True):
     """
-    This function shows the goldhand line strategy on a plotly candlestick chart.   
+    This function shows the GoldHandLine strategy on a plotly chart including the price,  trades, strategy summary and GoldHandLine indicator.
+       
     Parameters:
-    ticker (str): The ticker of the stock or ETF.
-    plot_title (str): The title of the plot.
-    ndays (int): The number of days to show. If 0, all data will be shown.
-    plot_height (int): The height of the plot.
-    add_strategy_summary (bool): If True, the strategy summary will be added to the plot.
-    Returns:
-    fig (plotly.graph_objects.Figure): The plotly figure.
+    - ticker (str): The ticker of the stock or crypto or ETF.
+    - plot_title (str): The title of the plot.
+    - buy_at (str): The color of the line to buy at. Default is 'gold'.
+    - sell_at (str): The color of the line to sell at. Default is 'grey'.
+    - ndays (int): The number of days to show. If 0, all data will be shown.
+    - plot_height (int): The height of the plot.
+    - add_strategy_summary (bool): If True, the strategy summary will be added to the plot.
+    
+    Returns: The plot including the price,  trades, strategy summary and GoldHandLine indicator.
     """
 
     data = GoldHand(ticker).df
@@ -159,10 +163,10 @@ def show_indicator_goldhand_line_strategy(ticker, plot_title = '', buy_at='gold'
     # Create a 'group' column and increase the value only when there's a color change
     data['group'] = (data['color_change']).cumsum()
 
-    ##### data prepar end
+    ##### data preparation end
 
     ##### backtest
-    backtest = Backtest( data, goldhand_line_strategy, plot_title =plot_title, buy_at='gold', sell_at='grey')
+    backtest = Backtest( data, goldhand_line_strategy, plot_title =plot_title, buy_at= buy_at, sell_at=sell_at)
     trades =backtest.trades
 
     if ndays!=0:

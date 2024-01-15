@@ -6,6 +6,15 @@ import plotly.express as px
 
 class Backtest:
     def __init__(self, data, strategy_function, plot_title='', **kwargs):
+        """
+        Backtest class to test strategies on historical data to see how they would have performed.
+        
+        Parameters:
+        - data: pandas DataFrame with historical data
+        - strategy_function: function that takes in the data and returns a DataFrame of trades
+        - plot_title: title for the plot
+        - kwargs: additional parameters to be passed to the strategy function
+        """
         self.data = data
         self.plot_title = plot_title
         self.strategy_function = strategy_function
@@ -15,6 +24,9 @@ class Backtest:
 
 
     def add_trades(self):
+        """
+        Calculate the trades using the strategy function and the data provided
+        """
         self.trades = self.strategy_function(self.data, **self.additional_params)
         self.trades['ticker'] = self.data['ticker'].iloc[0]
         
@@ -26,6 +38,9 @@ class Backtest:
 
 
     def summary_of_trades(self):
+        """
+        Calculate the summary of the trades
+        """
         self.trades_summary = {
           'ticker' : self.data['ticker'].iloc[0],
           'number_of_trades' : self.trades.shape[0],
@@ -68,6 +83,9 @@ class Backtest:
         self.trades_summary.update(self.additional_params)
 
     def show_trades(self):
+        """
+        Plot the trades of the strategy on the data provided
+        """
         tdf = self.data
         fig = go.Figure(data=go.Ohlc(x=tdf['date'], open=tdf['open'], high=tdf['high'], low=tdf['low'],close=tdf['close']))
         fig.add_trace( go.Scatter(x=tdf['date'], y=tdf['sma_50'], opacity =0.5, line=dict(color='lightblue', width = 2) , name = 'SMA 50') )
@@ -121,6 +139,12 @@ class Backtest:
 
 
     def summarize_strategy(self):
+        """
+        Display the summary of the strategy:
+        - Summary of trades
+        - Trades in interactive plot
+        - Trades in DataFrame
+        """
         display(pd.DataFrame(self.trades_summary, index=['Strategy summary']).T )
         self.show_trades().show()
         display(self.trades)

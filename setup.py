@@ -8,7 +8,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name="goldhand",
-    version="15.5",
+    version="15.7",
     author="Mihaly",
     author_email="ormraat.pte@gmail.com",
     description="A package working with financial data",
@@ -20,6 +20,5 @@ setup(
     # other arguments omitted
     long_description=long_description,
     long_description_content_type='text/markdown'
-
 )
 

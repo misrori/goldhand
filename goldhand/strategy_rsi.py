@@ -9,6 +9,14 @@ from goldhand import *
 
 
 def rsi_strategy(data, buy_threshold = 30, sell_threshold = 70):
+    """
+    RSI strategy for backtesting with Backtest class
+    
+    Parameters:
+    - data: pandas DataFrame with columns: date, open, high, low, close, volume and rsi
+    - buy_threshold: int, default 30,  buy when RSI is below this value
+    - sell_threshold: int, default 70, sell when RSI is above this value
+    """
 
     in_trade = False  # Flag to track if already in a trade
     trade_id = 1
@@ -78,6 +86,17 @@ def rsi_strategy(data, buy_threshold = 30, sell_threshold = 70):
 
 
 def show_indicator_rsi_strategy(ticker, buy_threshold = 30, sell_threshold = 70, plot_title = '', ndays=0, plot_height=1000, add_strategy_summary = True):
+    """
+    Show RSI strategy result in one plot: candlestick chart, SMA lines, trades, RSI indicator, summary of the strategy on the left side of the plot
+    Parameters:
+    - ticker: str, ticker symbol
+    - buy_threshold: int, default 30,  buy when RSI is below this value
+    - sell_threshold: int, default 70, sell when RSI is above this value
+    - plot_title: str, default '', title of the plot
+    - ndays: int, default 0, number of days to show, if 0, show all data
+    - plot_height: int, default 1000, height of the plot
+    - add_strategy_summary: bool, default True, add strategy summary to the plot
+    """
 
     tdf = GoldHand(ticker).df
     backtest = Backtest( tdf, rsi_strategy, buy_threshold=buy_threshold, sell_threshold=sell_threshold)
