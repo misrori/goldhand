@@ -116,12 +116,38 @@ backtest.summarize_strategy()
 `summarize_strategy`  will  show the trades summary, a plot with trades and the trades in DataFrame.
 
 
-
 !['Summary of trades'](https://github.com/misrori/goldhand/blob/main/img/tradesdf.png?raw=true  "summary of trades")
 
 !['Trades plot'](https://github.com/misrori/goldhand/blob/main/img/backtest_plot.png?raw=true  "trades plot")
 
-
 !['Trades'](https://github.com/misrori/goldhand/blob/main/img/trades_summary.png?raw=true  "trades df")
+
+
+# Strategys
+
+## RSI
+
+```python
+    """
+    RSI strategy for backtesting with Backtest class
+    
+    Parameters:
+    - data: pandas DataFrame with columns: date, open, high, low, close, volume and rsi
+    - buy_threshold: int, default 30,  buy when RSI is below this value
+    - sell_threshold: int, default 70, sell when RSI is above this value
+    """
+    backtest = Backtest( data, rsi_strategy, plot_title=tw.get_plotly_title(ticker),  buy_threshold=30, sell_threshold=70)
+
+
+```
+
+
+```python
+ticker = 'TSLA'
+p = show_indicator_rsi_strategy(ticker = ticker, buy_threshold=30, sell_threshold=70, plot_title=tw.get_plotly_title(ticker), add_strategy_summary=True)
+
+!['RSI strategy plot'](https://github.com/misrori/goldhand/blob/main/img/rsi_strategy_plot.png?raw=true  "RSI Strategy plot")
+
+```
 
 
