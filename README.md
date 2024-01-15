@@ -1,35 +1,4 @@
-class Backtest:
-    """
-    The Backtest class represents a simulation of a trading strategy on historical data.
 
-    Attributes:
-        strategy (Strategy): The trading strategy to be backtested.
-        data (pd.DataFrame): The historical data used for the backtest.
-        capital (float): The initial capital for the backtest.
-    """
-
-    def __init__(self, strategy, data, capital):
-        """
-        Initializes a new instance of the Backtest class.
-
-        Args:
-            strategy (Strategy): The trading strategy to be backtested.
-            data (pd.DataFrame): The historical data used for the backtest.
-            capital (float): The initial capital for the backtest.
-        """
-        self.strategy = strategy
-        self.data = data
-        self.capital = capital
-
-    def run(self):
-        """
-        Runs the backtest using the specified strategy and data.
-
-        Returns:
-            pd.DataFrame: The results of the backtest, including performance metrics.
-        """
-        # Implementation details...
-        pass
 # Goldhand
 The ultimate python package to work with stock and crypto data
 
