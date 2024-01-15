@@ -103,3 +103,25 @@ t.plot_goldhand_line(tw.get_plotly_title(ticker)).show()
 The Backtest class is a powerful tool for evaluating the performance of trading strategies using historical data. It allows you to simulate trades and calculate various performance metrics to assess the profitability and risk of your strategy.
 
 It takes a data and a function and display the trades. 
+
+
+
+```python
+ticker= 'TSLA'
+data = GoldHand(ticker).df
+backtest = Backtest( data, rsi_strategy, plot_title=tw.get_plotly_title(ticker),  buy_threshold=30, sell_threshold=70)
+backtest.summarize_strategy()
+
+```
+`summarize_strategy`  will  show the trades summary, a plot with trades and the trades in DataFrame.
+
+
+
+!['Summary of trades'](https://github.com/misrori/goldhand/blob/main/img/tradesdf.png?raw=true  "summary of trades")
+
+!['Trades plot'](https://github.com/misrori/goldhand/blob/main/img/backtest_plot.png?raw=true  "trades plot")
+
+
+!['Trades'](https://github.com/misrori/goldhand/blob/main/img/trades_summary.png?raw=true  "trades df")
+
+
