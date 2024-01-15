@@ -7,7 +7,7 @@ pip install goldhand
 ```
 
 
-# TradingView
+# [TradingView]((https://github.com/misrori/goldhand/tw.py))
 
 
 ```python
@@ -44,7 +44,7 @@ tw.get_sec_plot('AMD').show()
 
 
 
-# Goldhand class
+# [Goldhand class]((https://github.com/misrori/goldhand/stock.py))
 
 The `GoldHand` class is a part of the `goldhand` Python package, which provides functionality for working with stock and crypto data. This class allows users to retrieve detailed information and charts for a specific stock.
 
@@ -84,9 +84,8 @@ t.plotly_last_year(tw.get_plotly_title(ticker)).show()
 !['Detailed crypto chart'](https://github.com/misrori/goldhand/blob/main/img/crypto_plot.png?raw=true  "crypto plot")
 
 
-
-
-## GoldHand Line indicator 
+## [GoldHand Line indicator](https://gist.github.com/misrori/ae77642c31fb1a973c7627cc077a1df2) 
+https://gist.github.com/misrori/ae77642c31fb1a973c7627cc077a1df2
 
 ```python
 ticker = "TSLA"
@@ -98,7 +97,7 @@ t.plot_goldhand_line(tw.get_plotly_title(ticker)).show()
 
 
 
-# Backtest
+# [Backtest](https://github.com/misrori/goldhand/backtest.py)
 
 The Backtest class is a powerful tool for evaluating the performance of trading strategies using historical data. It allows you to simulate trades and calculate various performance metrics to assess the profitability and risk of your strategy.
 
@@ -125,7 +124,7 @@ backtest.summarize_strategy()
 
 # Strategys
 
-## RSI
+## [RSI Strategy](https://github.com/misrori/goldhand/strategy_rsi.py)
 
 ```python
     """
@@ -138,16 +137,36 @@ backtest.summarize_strategy()
     """
     backtest = Backtest( data, rsi_strategy, plot_title=tw.get_plotly_title(ticker),  buy_threshold=30, sell_threshold=70)
 
-
 ```
 
 
 ```python
 ticker = 'TSLA'
 p = show_indicator_rsi_strategy(ticker = ticker, buy_threshold=30, sell_threshold=70, plot_title=tw.get_plotly_title(ticker), add_strategy_summary=True)
-
+```
 !['RSI strategy plot'](https://github.com/misrori/goldhand/blob/main/img/rsi_strategy_plot.png?raw=true  "RSI Strategy plot")
 
+## [GoldHand Line indicator](https://github.com/misrori/goldhand/strategy_goldhand_line.py) 
+
+```python
+    """
+    This function implements the GoldHandLine strategy.
+    
+    Parameters:
+    - data (pandas DataFrame) : The DataFrame containing the data.
+    - buy_at (str): The color of the line to buy at. Default is 'gold'.
+    - sell_at (str): The color of the line to sell at. Default is 'grey'.
+    
+    """
+    backtest = Backtest( data, goldhand_line_strategy,)
+
 ```
+
+```python
+ticker = 'BTC-USD'
+show_indicator_goldhand_line_strategy(ticker = ticker, plot_title=tw.get_plotly_title(ticker), buy_at='gold', sell_at='blue',  add_strategy_summary=True)
+```
+!['GoldHand Line strategy plot'](https://github.com/misrori/goldhand/blob/main/img/goldhand_line_strategy_plot.png?raw=true  "GoldHand Line Strategy plot")
+
 
 
