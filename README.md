@@ -94,7 +94,7 @@ t = GoldHand(ticker)
 t.plot_goldhand_line(tw.get_plotly_title(ticker)).show()
 
 ```
-!['Detailed crypto chart'](https://github.com/misrori/goldhand/blob/main/img/goldhandline_plot.png?raw=true  "crypto plot")
+!['Detailed crypto chart'](https://github.com/misrori/goldhand/blob/main/img/goldhand_line_plot.png?raw=true  "crypto plot")
 
 
 
