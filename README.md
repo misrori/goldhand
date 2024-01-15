@@ -85,7 +85,7 @@ t.plotly_last_year(tw.get_plotly_title(ticker)).show()
 
 
 ## [GoldHand Line indicator](https://gist.github.com/misrori/ae77642c31fb1a973c7627cc077a1df2) 
-https://gist.github.com/misrori/ae77642c31fb1a973c7627cc077a1df2
+
 
 ```python
 ticker = "TSLA"
