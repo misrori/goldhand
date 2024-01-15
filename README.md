@@ -1,3 +1,35 @@
+class Backtest:
+    """
+    The Backtest class represents a simulation of a trading strategy on historical data.
+
+    Attributes:
+        strategy (Strategy): The trading strategy to be backtested.
+        data (pd.DataFrame): The historical data used for the backtest.
+        capital (float): The initial capital for the backtest.
+    """
+
+    def __init__(self, strategy, data, capital):
+        """
+        Initializes a new instance of the Backtest class.
+
+        Args:
+            strategy (Strategy): The trading strategy to be backtested.
+            data (pd.DataFrame): The historical data used for the backtest.
+            capital (float): The initial capital for the backtest.
+        """
+        self.strategy = strategy
+        self.data = data
+        self.capital = capital
+
+    def run(self):
+        """
+        Runs the backtest using the specified strategy and data.
+
+        Returns:
+            pd.DataFrame: The results of the backtest, including performance metrics.
+        """
+        # Implementation details...
+        pass
 # Goldhand
 The ultimate python package to work with stock and crypto data
 
@@ -45,6 +77,9 @@ tw.get_sec_plot('AMD').show()
 
 # Goldhand class
 
+The `GoldHand` class is a part of the `goldhand` Python package, which provides functionality for working with stock and crypto data. This class allows users to retrieve detailed information and charts for a specific stock.
+
+
 
 ```python
 
@@ -59,9 +94,11 @@ t.df.tail().T
 ```python
 
 # Get a detailed chart of a stock AMD
-ticker = "AMD"
+ticker = "TSLA"
 t = GoldHand(ticker)
 t.plotly_last_year(tw.get_plotly_title(ticker)).show()
+
+## Stock Chart
 
 ```
 !['Detailed stock chart'](https://github.com/misrori/goldhand/blob/main/img/stock_plot.png?raw=true  "Stock plot")
@@ -80,3 +117,20 @@ t.plotly_last_year(tw.get_plotly_title(ticker)).show()
 
 
 
+## GoldHand Line indicator 
+
+```python
+ticker = "TSLA"
+t = GoldHand(ticker)
+t.plot_goldhand_line(tw.get_plotly_title(ticker)).show()
+
+```
+!['Detailed crypto chart'](https://github.com/misrori/goldhand/blob/main/img/goldhandline_plot.png?raw=true  "crypto plot")
+
+
+
+# Backtest
+
+The Backtest class is a powerful tool for evaluating the performance of trading strategies using historical data. It allows you to simulate trades and calculate various performance metrics to assess the profitability and risk of your strategy.
+
+It takes a data and a function and display the trades. 

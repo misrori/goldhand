@@ -81,7 +81,7 @@ class Backtest:
           'last_data_date' : self.data['date'].iloc[-1],
           'last_close_price' : self.data['close'].iloc[-1],
           
-          'hold_result' : f"{round(t.df['close'].iloc[-1] / t.df['open'].iloc[0],2)} x",
+          'hold_result' : f"{round(self.data['close'].iloc[-1] / self.data['open'].iloc[0],2)} x",
           
 
         }
