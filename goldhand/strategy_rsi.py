@@ -191,20 +191,9 @@ def show_indicator_rsi_strategy(ticker, buy_threshold = 30, sell_threshold = 70,
     fig.update_yaxes(mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey', row=2, col=1)
 
     if add_strategy_summary:
-        t= backtest.trades_summary
-        trade_text = f"Trades: {t['number_of_trades']}<br>"\
-        f"Win ratio: {t['win_ratio(%)']}%<br>"\
-        f"Average result: {t['average_res(%)']}%<br>"\
-        f"Median result: {t['median_res(%)']}%<br>"\
-        f"Average trade length: {round(t['average_trade_len(days)'], 0)} days<br>"\
-        f"Cumulative result: {round(t['cumulative_result'], 2)}x<br>"\
-        f"Profitable trades mean: {t['profitable_trades_mean']}%<br>"\
-        f"Profitable trades median: {t['profitable_trades_median']}%<br>"\
-        f"Looser trades mean: {t['looser_trades_mean']}%<br>"\
-        f"Looser trades median: {t['looser_trades_median']}%<br>"
-
+      
         # Add a larger textbox using annotations
-        fig.add_annotation( go.layout.Annotation( x=tex_loc[0], y=tex_loc[1], xref='paper', yref='paper', text=trade_text, showarrow=True, arrowhead=4, ax=0, ay=0, bordercolor='black', borderwidth=2, bgcolor='white', align='left', font=dict(size=14, color='black')))
+        fig.add_annotation( go.layout.Annotation( x=tex_loc[0], y=tex_loc[1], xref='paper', yref='paper', text=backtest.trade_summary_plot_text, showarrow=True, arrowhead=4, ax=0, ay=0, bordercolor='black', borderwidth=2, bgcolor='white', align='left', font=dict(size=14, color='black')))
 
 
     # Add RSI line

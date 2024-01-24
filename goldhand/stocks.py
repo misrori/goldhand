@@ -135,14 +135,22 @@ class GoldHand:
             else:
                 self.df.loc[states[0],'local_text'] = f"${round(self.df.loc[states[0], 'high'], 2)}"
 
-            # add last fall if last local is max
-            if list(self.df[self.df['local']!='']['local'])[-1]=='maximum':
-                last_min_id = self.df.loc[self.df['low']==min(self.df['low'][-3:] )].index.to_list()[0]
-                self.df.loc[last_min_id , 'local'] = 'minimum'
+            
+            # add one local min max after the last one
+            if self.df.loc[states[-1], 'local']== 'maximum':
+                lowest_index_after_last_max = self.df['low'][states[-1]+1:].idxmin()
+                self.df.loc[lowest_index_after_last_max, 'local'] = 'minimum'
+            else:
+                high_index_after_last_min = self.df['high'][states[-1]+1:].idxmax()
+                self.df.loc[high_index_after_last_min, 'local'] = 'maximum'
 
             states = self.df[self.df['local']!='']['local'].index.to_list()
-            
-            
+
+        except:
+            pass
+        
+        try:
+                
             for i in range(1,len(states)):
                 prev = self.df.loc[states[i-1], 'local']
                 current= self.df.loc[states[i], 'local']

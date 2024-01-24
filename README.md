@@ -1,5 +1,5 @@
 
-# Goldhand
+# [Goldhand](https://github.com/misrori/goldhand)
 The ultimate python package to work with stock and crypto data
 
 ```bash
@@ -44,7 +44,7 @@ tw.get_sec_plot('AMD').show()
 
 
 
-# [Goldhand class]((https://github.com/misrori/goldhand/stock.py))
+# [Goldhand class](https://github.com/misrori/goldhand/stock.py)
 
 The `GoldHand` class is a part of the `goldhand` Python package, which provides functionality for working with stock and crypto data. This class allows users to retrieve detailed information and charts for a specific stock.
 

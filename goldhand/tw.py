@@ -32,6 +32,7 @@ class Tw:
         self.stock = pd.DataFrame(list_elements)
         self.stock.columns = json.loads(data_query)['columns']
         self.stock = self.stock[self.stock['name'].str.contains('\\.')!=True]
+        self.stock.reset_index(inplace=True, drop=True)
 
 
     def get_all_crypto(self):
@@ -48,6 +49,7 @@ class Tw:
         filter = list(map(lambda x: 'stablecoins' not in x, self.crypto['crypto_common_categories'].fillna('-') ))
         self.crypto = self.crypto.loc[filter, ]
         self.crypto['ticker'] = self.crypto['base_currency'] + '-USD'
+        self.crypto.reset_index(inplace=True, drop=True)
 
     def get_all_etf(self):
         """
@@ -60,6 +62,7 @@ class Tw:
         self.etf = pd.DataFrame(list_elements)
         self.etf.columns = json.loads(data_query)['columns']
         self.etf = self.etf[self.etf['name'].str.contains('\\.')!=True]
+        self.etf.reset_index(inplace=True, drop=True)
     
     
     def moneystring( self, money):

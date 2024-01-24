@@ -5,11 +5,11 @@ tw =Tw()
 
 
 
-ticker = 'TSLA'
+ticker = 'SPY'
 
 data = GoldHand(ticker).df
 
-backtest = Backtest( data, goldhand_line_strategy, buy_at='gold', sell_at='grey')
+backtest = Backtest( data, goldhand_line_strategy,plot_title=tw.get_plotly_title(ticker) , buy_at='gold', sell_at='grey')
 
 backtest.show_trades().show()
 

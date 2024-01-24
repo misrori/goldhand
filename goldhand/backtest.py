@@ -50,7 +50,7 @@ class Backtest:
           
           
           'median_res(%)': round(((self.trades['result'].median()-1)*100),2),
-          'cumulative_result': list(np.cumprod(self.trades['result'], axis=0))[-1],
+          'cumulative_result': f"{round(list(np.cumprod(self.trades['result'], axis=0))[-1], 2)} x",
           'trade_results': ' # '.join([ str(round(((x-1)*100),2)) for x in self.trades['result']]),
 
           'profitable_trade_results': ' # '.join([ str(round(((x-1)*100),2)) for x in self.trades['result'] if x>=1]),
@@ -75,17 +75,31 @@ class Backtest:
           'first_trade_buy' : min(self.trades['buy_date']),
           
           
-          'first_data_date' : self.data['date'].iloc[0],
-          'first_open_price' : self.data['open'].iloc[0],
+          'first_data_date' : self.data['date'].iloc[0].strftime('%Y-%m-%d'),
+          'first_open_price' : round(self.data['open'].iloc[0], 2),
           
-          'last_data_date' : self.data['date'].iloc[-1],
-          'last_close_price' : self.data['close'].iloc[-1],
+          'last_data_date' : self.data['date'].iloc[-1].strftime('%Y-%m-%d'),
+          'last_close_price' :round(self.data['close'].iloc[-1], 2),
           
           'hold_result' : f"{round(self.data['close'].iloc[-1] / self.data['open'].iloc[0],2)} x",
-          
-
         }
         self.trades_summary.update(self.additional_params)
+        self.trade_summary_plot_text = f"Trades: { self.trades_summary['number_of_trades']}<br>"\
+        f"Win ratio: { self.trades_summary['win_ratio(%)']}%<br>"\
+        f"Average result: { self.trades_summary['average_res(%)']}%<br>"\
+        f"Median result: { self.trades_summary['median_res(%)']}%<br>"\
+        f"Average trade length: { self.trades_summary['average_trade_len(days)']} days<br>"\
+        f"Cumulative result: { self.trades_summary['cumulative_result']}<br>"\
+        f"Profitable trades mean: { self.trades_summary['profitable_trades_mean']}%<br>"\
+        f"Profitable trades median: { self.trades_summary['profitable_trades_median']}%<br>"\
+        f"Looser trades mean: { self.trades_summary['looser_trades_mean']}%<br>"\
+        f"Looser trades median: { self.trades_summary['looser_trades_median']}%<br>"\
+        f"Hold result: {self.trades_summary['hold_result'] }<br>"\
+        f"First data date: { self.trades_summary['first_data_date']}<br>"\
+        f"First open price: ${self.trades_summary['first_open_price']}<br>"
+            
+
+        
 
     def show_trades(self):
         """
