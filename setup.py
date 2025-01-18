@@ -8,13 +8,13 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name="goldhand",
-    version="17.1",
+    version="17.2",
     author="Mihaly",
     author_email="ormraat.pte@gmail.com",
     description="A package working with financial data",
     url="https://github.com/misrori/goldhand",
     license="MIT",
-    install_requires=['pandas_datareader', 'pandas', 'pandas_ta', 'plotly', 'scipy', 
+    install_requires=['pandas_datareader', 'pandas', 'pandas_ta', 'plotly', 'scipy', 'numpy==1.26.4',
                       'numpy', 'requests', 'cloudscraper', 'tqdm'],
     packages=find_packages(),
     # other arguments omitted
