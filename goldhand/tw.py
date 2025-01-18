@@ -131,21 +131,23 @@ class Tw:
         - ticker: ticker of the stock
         Return: Summary of the stock or crypto to be used as plotly title
         """
-
-        if '-USD' in ticker:
-            # crypto
-            coin = self.crypto.loc[self.crypto['ticker']==ticker].iloc[0]
-            plotly_title = f"{coin['base_currency_desc']} ({coin['base_currency']})<br>💲{self.moneystring(coin['market_cap_calc'])} | {', '.join(coin['crypto_common_categories'])}"
-        
-        elif ticker in self.etf['name'].tolist() :
-            # ETF
-            t = self.etf.loc[self.etf['name']==ticker].iloc[0]
-            plotly_title = f"{t['description']} ({t['name']}) | 💲{round(t['close'], 2)} <br>AUM:💲{self.moneystring(t['aum'])} | {t['focus.tr']}  | Expense ratio {t['expense_ratio']}"
-        else:
-            # stock
-            t = self.get_one_stock_info(ticker)
-            plotly_title = f"{t['name']} ({t['ticker']}) | 💲{round(t['price'], 2)} | {t['sector']} | {t['industry']} <br>💲{t['market_cap_text']} | 👨‍💼 {round(t['n_emp']):,} <br>Sector location: {t['sec_loc']} | Industry location: {t['ind_loc']}"
-        return(plotly_title)
+        try:
+            if '-USD' in ticker:
+                # crypto
+                coin = self.crypto.loc[self.crypto['ticker']==ticker].iloc[0]
+                plotly_title = f"{coin['base_currency_desc']} ({coin['base_currency']})<br>💲{self.moneystring(coin['market_cap_calc'])} | {', '.join(coin['crypto_common_categories'])}"
+            
+            elif ticker in self.etf['name'].tolist() :
+                # ETF
+                t = self.etf.loc[self.etf['name']==ticker].iloc[0]
+                plotly_title = f"{t['description']} ({t['name']}) | 💲{round(t['close'], 2)} <br>AUM:💲{self.moneystring(t['aum'])} | {t['focus.tr']}  | Expense ratio {t['expense_ratio']}"
+            else:
+                # stock
+                t = self.get_one_stock_info(ticker)
+                plotly_title = f"{t['name']} ({t['ticker']}) | 💲{round(t['price'], 2)} | {t['sector']} | {t['industry']} <br>💲{t['market_cap_text']} | 👨‍💼 {round(t['n_emp']):,} <br>Sector location: {t['sec_loc']} | Industry location: {t['ind_loc']}"
+            return(plotly_title)
+        except:
+            return(f"{ticker}")
 
 
     def get_sec_plot(self, ticker):
