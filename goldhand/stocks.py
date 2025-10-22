@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 import pandas as pd
-import pandas_ta as ta
 import plotly.graph_objects as go
 import plotly.express as px
 from scipy.signal import argrelextrema
@@ -77,23 +76,41 @@ class GoldHand:
         
         try:
             # Rsi
-            self.df['rsi'] = ta.rsi(self.df['close'], 14)
+            window = 14
+            delta = self.df['close'].diff()
+
+            gain = delta.clip(lower=0)
+            loss = -delta.clip(upper=0)
+
+            avg_gain = gain.rolling(window).mean()
+            avg_loss = loss.rolling(window).mean()
+
+            rs = avg_gain / avg_loss
+            self.df['rsi'] = 100 - (100 / (1 + rs))
+        
 
             # SMAS
-            self.df['sma_50']= ta.sma(self.df['close'], 50)
+            self.df['sma_50']  = self.df['close'].rolling(50).mean()
+            self.df['sma_100'] = self.df['close'].rolling(100).mean()
+            self.df['sma_200'] = self.df['close'].rolling(200).mean()
+
             self.df['diff_sma50'] = (self.df['close']/self.df['sma_50'] -1)*100
-            self.df['sma_100']= ta.sma(self.df['close'], 100)
             self.df['diff_sma100'] = (self.df['close']/self.df['sma_100'] -1)*100
-            self.df['sma_200']= ta.sma(self.df['close'], 200)
             self.df['diff_sma200'] = (self.df['close']/self.df['sma_200'] -1)*100
 
             #Bolinger bands
-            bb = ta.bbands(self.df['close'])
-            bb.columns = ['bb_lower', 'bb_mid', 'bb_upper', 'bandwidth', 'percent']
-            self.df['bb_lower'] = bb['bb_lower']
-            self.df['bb_upper'] = bb['bb_upper']
+            bb_window = 20
+
+            mid = self.df['close'].rolling(bb_window).mean()
+            std = self.df['close'].rolling(bb_window).std()
+
+            self.df['bb_mid']   = mid
+            self.df['bb_upper'] = mid + 2*std
+            self.df['bb_lower'] = mid - 2*std
+
             self.df['diff_upper_bb'] = (self.df['bb_upper']/self.df['close'] -1)*100
             self.df['diff_lower_bb'] = (self.df['bb_lower']/self.df['close'] -1)*100
+
 
             #local min maxs
             self.df['local'] = ''

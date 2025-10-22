@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 import pandas as pd
-import pandas_ta as ta
 import plotly.graph_objects as go
 import plotly.express as px
 from scipy.signal import argrelextrema
@@ -21,30 +20,43 @@ def get_olhc( ticker, scraper = cloudscraper.create_scraper(),  ad_ticker=False,
 
 
 def get_olhc_data(ticker):
-    # Download historical stock data for the last year
     df = get_olhc(ticker)
     df.columns = df.columns.str.lower()
     df['date']= [x.date() for x in df['date']]
 
-    # Rsi
-    df['rsi'] = ta.rsi(df['close'], 14)
+    # ===== RSI (14, Wilder smoothing) =====
+    delta = df['close'].diff()
+    gain = delta.clip(lower=0)
+    loss = -delta.clip(upper=0)
+    win = 14
+    avg_gain = gain.ewm(alpha=1/win, min_periods=win).mean()
+    avg_loss = loss.ewm(alpha=1/win, min_periods=win).mean()
+    rs = avg_gain / avg_loss
+    df['rsi'] = 100 - (100 / (1 + rs))
 
-    # SMAS
-    df['sma_50']= ta.sma(df['close'], 50)
-    df['diff_sma50'] = (df['close']/df['sma_50'] -1)*100
-    df['sma_100']= ta.sma(df['close'], 100)
+    # ===== SMAS =====
+    df['sma_50']  = df['close'].rolling(50).mean()
+    df['diff_sma50']  = (df['close']/df['sma_50']  -1)*100
+
+    df['sma_100'] = df['close'].rolling(100).mean()
     df['diff_sma100'] = (df['close']/df['sma_100'] -1)*100
-    df['sma_200']= ta.sma(df['close'], 200)
+
+    df['sma_200'] = df['close'].rolling(200).mean()
     df['diff_sma200'] = (df['close']/df['sma_200'] -1)*100
 
-    #Bolinger bands
-    bb = ta.bbands(df['close'])
-    bb.columns = ['bb_lower', 'bb_mid', 'bb_upper', 'bandwidth', 'percent']
-    df['bb_lower'] = bb['bb_lower']
-    df['bb_upper'] = bb['bb_upper']
+    # ===== Bollinger Bands (20, 2) =====
+    mid = df['close'].rolling(20).mean()
+    std = df['close'].rolling(20).std()
+    df['bb_mid']   = mid
+    df['bb_upper'] = mid + 2*std
+    df['bb_lower'] = mid - 2*std
+
     df['diff_upper_bb'] = (df['bb_upper']/df['close'] -1)*100
     df['diff_lower_bb'] = (df['bb_lower']/df['close'] -1)*100
-    return(df)
+
+    return df
+
+
 
 def add_locals_to_olhc(df):
     #local min maxs
