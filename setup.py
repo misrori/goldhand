@@ -8,14 +8,14 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name="goldhand",
-    version="18.0",
+    version="20.0",
     author="Mihaly",
     author_email="ormraat.pte@gmail.com",
     description="A package working with financial data",
     url="https://github.com/misrori/goldhand",
     license="MIT",
-    install_requires=['pandas_datareader', 'pandas', 'plotly', 'scipy', 'numpy', 'numba',
-                      'requests', 'cloudscraper', 'tqdm'],
+    install_requires=['pandas', 'plotly', 'scipy', 'numpy', 'numba',
+                      'requests', 'tqdm', 'yfinance<1.0', 'ipython'],
     packages=find_packages(),
     # other arguments omitted
     long_description=long_description,
