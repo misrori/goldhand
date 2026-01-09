@@ -140,8 +140,12 @@ class Backtest:
             f"Trades: {self.trades_summary['number_of_trades']}<br>"
             f"Win ratio: {self.trades_summary['win_ratio(%)']}%<br>"
             f"Avg Result: {self.trades_summary['average_res(%)']}%<br>"
+            f"Median Result: {self.trades_summary['median_res(%)']}%<br>"
             f"Cum Result: {self.trades_summary['cumulative_result']}<br>"
-            f"Hold Result: {self.trades_summary['hold_result']}"
+            f"Hold Result: {self.trades_summary['hold_result']}<br>"   
+            f"First Open Price: {self.trades_summary['first_open_price']}<br>"
+            f"Last Close Price: {self.trades_summary['last_close_price']}"
+
         )
 
     def show_trades(self):
@@ -159,10 +163,26 @@ class Backtest:
             summary_text=self.trade_summary_plot_text
         )
 
+
     def summarize_strategy(self):
         """
         Display summary table and plot.
         """
+        # Display summary table
         display(pd.DataFrame(self.trades_summary, index=['Strategy summary']).T)
-        self.show_trades().show()
+
+        # Get the figure (do not call `.show()` which opens a browser)
+        fig = self.show_trades()
+
+        # In IPython environments, `display(fig)` renders inline without opening a new tab.
+        try:
+            display(fig)
+        except Exception:
+            # Fallback: if display fails, just return the figure for callers to handle.
+            pass
+
+        # Also display the trades DataFrame
         display(self.trades)
+
+        # Return the figure so callers (e.g., Streamlit) can render it.
+        return fig

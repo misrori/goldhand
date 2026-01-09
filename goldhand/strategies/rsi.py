@@ -114,12 +114,15 @@ def show_indicator_rsi_strategy(ticker, buy_threshold=30, sell_threshold=70, plo
     fig.add_shape(type="line", x0=data['date'].min(), x1=data['date'].max(), y0=sell_threshold, y1=sell_threshold, line=dict(color="grey", width=1, dash="dash"), layer='above', row=2, col=1)
 
     # Style (consistent with Plotting class)
-    fig.update_layout(template='plotly_white', height=plot_height, title=plot_title, showlegend=False)
+    fig.update_layout(template='plotly_white', height=plot_height, title=plot_title, showlegend=False, plot_bgcolor='white')
     
     # Apply style to all axes explicitly
     fig.update_xaxes(mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey')
     fig.update_yaxes(mirror=True, ticks='outside', showline=True, linecolor='black', gridcolor='lightgrey')
     fig.update(layout_xaxis_rangeslider_visible=False)
+
+ 
+        
 
     
     if add_strategy_summary:
