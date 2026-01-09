@@ -27,9 +27,9 @@ class Tw:
         data_query = '{"filter":[{"left":"type","operation":"in_range","right":["stock","dr","fund"]},{"left":"subtype","operation":"in_range","right":["common","foreign-issuer","","etf","etf,odd","etf,otc","etf,cfd"]},{"left":"exchange","operation":"in_range","right":["AMEX","NASDAQ","NYSE"]},{"left":"is_primary","operation":"equal","right":true},{"left":"active_symbol","operation":"equal","right":true}],"options":{"lang":"en"},"markets":["america"],"symbols":{"query":{"types":[]},"tickers":[]},"columns":["logoid","name","close","change","change_abs","Recommend.All","volume","Value.Traded","market_cap_basic","price_earnings_ttm","earnings_per_share_basic_ttm","number_of_employees","sector","High.3M","Low.3M","Perf.3M","Perf.5Y","High.1M","Low.1M","High.6M","Low.6M","Perf.6M","beta_1_year","price_52_week_high","price_52_week_low","High.All","Low.All","BB.lower","BB.upper","change|1M","change_abs|1M","change|1W","change_abs|1W","change|240","country","EMA50","EMA100","EMA200","MACD.macd","MACD.signal","Mom","Perf.1M","RSI7","SMA50","SMA100","SMA200","Stoch.RSI.K","Stoch.RSI.D","Perf.W","Perf.Y","Perf.YTD","industry","Perf.All","description","type","subtype","update_mode","pricescale","minmov","fractional","minmove2","Mom[1]","RSI7[1]","Rec.Stoch.RSI","currency","fundamental_currency_code"],"sort":{"sortBy":"market_cap_basic","sortOrder":"desc"},"range":[0,8000]}'
         response = requests.post('https://scanner.tradingview.com/america/scan', data=data_query)
         data = response.json()
-        list_elements = list(map(lambda x:[x['s'],x['d']], data['data'] ))
-        self.stock = pd.DataFrame(list_elements)
-        self.stock.columns = json.loads(data_query)['columns']
+        list_elements = [x['d'] for x in data['data']]
+        columns = json.loads(data_query)['columns']
+        self.stock = pd.DataFrame(list_elements, columns=columns)
         self.stock['tradingview_id'] = [x['s'] for x in data['data']]
         self.stock = self.stock[self.stock['name'].str.contains('\\.')!=True]
         self.stock.reset_index(inplace=True, drop=True)
