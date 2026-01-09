@@ -1,0 +1,219 @@
+from datetime import datetime, timedelta
+import pandas as pd
+import plotly.graph_objects as go
+import plotly.express as px
+from scipy.signal import argrelextrema
+import numpy as np
+import requests
+import json
+import yfinance as yf
+
+def download(ticker: str, period: str = 'max', interval: str = '1d', auto_adjust: bool = True) -> pd.DataFrame:
+        """
+        Download historical data for a single ticker.
+        
+        Parameters:
+        - ticker: str, symbol (e.g., 'AAPL', 'BTC-USD')
+        - period: str, data period to download (e.g. '1y', '2y', 'max')
+        - interval: str, data interval (e.g. '1d', '1h')
+        
+        Returns:
+        - pd.DataFrame with lowercase columns ['date', 'open', 'high', 'low', 'close', 'volume', 'ticker']
+        """
+        try:
+            # Using yfinance to download data
+            # auto_adjust=True fixes the Close price for splits and dividends
+            df = yf.download(ticker, period=period, interval=interval, auto_adjust=auto_adjust, progress=False, multi_level_index=False)
+            
+            if df.empty:
+                print(f"Warning: No data found for ticker {ticker}")
+                return pd.DataFrame()
+
+            # Clean up DataFrame
+            df.reset_index(inplace=True)
+            df.columns = df.columns.str.lower()
+            
+            # Rename 'Date'/'Datetime' to 'date' consistently
+            if 'date' not in df.columns:
+                if 'datetime' in df.columns:
+                    df.rename(columns={'datetime': 'date'}, inplace=True)
+            
+            # Ensure 'date' column is datetime.date objects for compatibility with existing logic
+            if 'date' in df.columns:
+                df['date'] = pd.to_datetime(df['date']).dt.date
+
+            # Add ticker column
+            df['ticker'] = ticker
+            
+            # Select relevant columns
+            cols = ['date', 'open', 'high', 'low', 'close', 'volume', 'ticker']
+            df = df[[c for c in cols if c in df.columns]]
+            
+            return df
+            
+        except Exception as e:
+            print(f"Error downloading data for {ticker}: {e}")
+            return pd.DataFrame()
+
+
+
+def get_olhc_data(ticker):
+    df = download(ticker)
+    df.columns = df.columns.str.lower()
+    df['date']= [x.date() for x in df['date']]
+
+    # ===== RSI (14, Wilder smoothing) =====
+    delta = df['close'].diff()
+    gain = delta.clip(lower=0)
+    loss = -delta.clip(upper=0)
+    win = 14
+    avg_gain = gain.ewm(alpha=1/win, min_periods=win).mean()
+    avg_loss = loss.ewm(alpha=1/win, min_periods=win).mean()
+    rs = avg_gain / avg_loss
+    df['rsi'] = 100 - (100 / (1 + rs))
+
+    # ===== SMAS =====
+    df['sma_50']  = df['close'].rolling(50).mean()
+    df['diff_sma50']  = (df['close']/df['sma_50']  -1)*100
+
+    df['sma_100'] = df['close'].rolling(100).mean()
+    df['diff_sma100'] = (df['close']/df['sma_100'] -1)*100
+
+    df['sma_200'] = df['close'].rolling(200).mean()
+    df['diff_sma200'] = (df['close']/df['sma_200'] -1)*100
+
+    # ===== Bollinger Bands (20, 2) =====
+    mid = df['close'].rolling(20).mean()
+    std = df['close'].rolling(20).std()
+    df['bb_mid']   = mid
+    df['bb_upper'] = mid + 2*std
+    df['bb_lower'] = mid - 2*std
+
+    df['diff_upper_bb'] = (df['bb_upper']/df['close'] -1)*100
+    df['diff_lower_bb'] = (df['bb_lower']/df['close'] -1)*100
+
+    return df
+
+
+
+def add_locals_to_olhc(df):
+    #local min maxs
+    df['local'] = ''
+    df['local_text'] = ''
+    max_ids = list(argrelextrema(df['high'].values, np.greater, order=30)[0])
+    min_ids = list(argrelextrema(df['low'].values, np.less, order=30)[0])
+    df.loc[min_ids, 'local'] = 'minimum'
+    df.loc[max_ids, 'local'] = 'maximum'
+
+
+    states = df[df['local']!='']['local'].index.to_list()
+    problem = []
+    problem_list = []
+    for i in range(0, (len(states)-1) ):
+
+        if (df.loc[states[i], 'local'] != df.loc[states[i+1], 'local']):
+            if (len(problem)==0):
+                continue
+            else:
+                problem.append(states[i])
+                text = df.loc[states[i], 'local']
+                if(text=='minimum'):
+                    real_min = df.loc[problem, 'low'].idxmin()
+                    problem.remove(real_min)
+                    df.loc[problem, 'local']=''
+                else:
+                    real_max = df.loc[problem, 'high'].idxmax()
+                    problem.remove(real_max)
+                    df.loc[problem, 'local']=''
+
+                problem = []
+        else:
+            problem.append(states[i])
+
+    states = df[df['local']!='']['local'].index.to_list()
+
+    # if first is min ad the price
+    if df.loc[states[0], 'local']== 'minimum':
+        df.loc[states[0],'local_text'] = f"${round(df.loc[states[0], 'low'], 2)}"
+    else:
+        df.loc[states[0],'local_text'] = f"${round(df.loc[states[0], 'high'], 2)}"
+
+    # add last fall if last local is max
+    if list(df[df['local']!='']['local'])[-1]=='maximum':
+        last_min_id = df.loc[df['low']==min(df['low'][-3:] )].index.to_list()[0]
+        df.loc[last_min_id , 'local'] = 'minimum'
+
+    states = df[df['local']!='']['local'].index.to_list()
+
+
+    for i in range(1,len(states)):
+        prev = df.loc[states[i-1], 'local']
+        current= df.loc[states[i], 'local']
+        prev_high = df.loc[states[i-1], 'high']
+        prev_low = df.loc[states[i-1], 'low']
+        current_high = df.loc[states[i], 'high']
+        current_low = df.loc[states[i], 'low']
+        if current == 'maximum':
+            # rise
+            rise = (current_high/ prev_low -1)*100
+            if rise>100:
+                df.loc[states[i], 'local_text'] = f'🚀🌌{round(((rise+100)/100), 2)}x<br>${round(current_high, 2)}'
+            else:
+                df.loc[states[i], 'local_text'] = f'🚀{round(rise, 2)}%<br>${round(current_high, 2)}'
+        else:
+            fall = round((1-(current_low / prev_high))*100, 2)
+            df.loc[states[i], 'local_text'] = f'🔻{fall}%<br>${round(current_low, 2)}'
+    return(df)
+
+def plotly_with_locals(tdf,plot_title, plot_height=900):
+    fig = go.Figure(data=go.Ohlc(x=tdf['date'], open=tdf['open'], high=tdf['high'], low=tdf['low'],close=tdf['close']))
+
+    for index, row in tdf[tdf['local']!=''].iterrows():
+        direction = row['local']
+        tdate = row['date']
+        local_text = row['local_text']
+        min_price = row['low']
+        max_price = row['high']
+        if direction == 'maximum':
+            fig.add_annotation( x=tdate, y=max_price, text=local_text, showarrow=True,
+            align="center", bordercolor="#c7c7c7",
+            font=dict(family="Courier New, monospace", size=16, color="#214e34" ), borderwidth=2,
+            borderpad=4,
+            bgcolor="#f4fdff",
+            opacity=0.8,
+            arrowhead=2,
+            arrowsize=1,
+            arrowwidth=1,
+            ax=-45,ay=-45)
+
+        if direction == 'minimum':
+            fig.add_annotation( x=tdate, y=min_price, text=local_text, showarrow=True,
+            align="center", bordercolor="#c7c7c7",
+            font=dict(family="Courier New, monospace", size=16, color="red" ), borderwidth=2,
+            borderpad=4,
+            bgcolor="#f4fdff",
+            opacity=0.8,
+            arrowhead=2,
+            arrowsize=1,
+            arrowwidth=1,
+            ax=45,ay=45)
+
+        fig.update_layout(showlegend=False, plot_bgcolor='white', height=plot_height, title= plot_title)
+
+    fig.update_xaxes(
+        mirror=True,
+        ticks='outside',
+        showline=True,
+        linecolor='black',
+        gridcolor='lightgrey'
+    )
+    fig.update_yaxes(
+        mirror=True,
+        ticks='outside',
+        showline=True,
+        linecolor='black',
+        gridcolor='lightgrey'
+    )
+    fig.update(layout_xaxis_rangeslider_visible=False)
+    return(fig)
+

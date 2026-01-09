@@ -67,6 +67,7 @@ class Tw:
         self.etf = self.etf[self.etf['name'].str.contains('\\.')!=True]
         self.etf.reset_index(inplace=True, drop=True)
     
+
     
     def moneystring( self, money):
         """
